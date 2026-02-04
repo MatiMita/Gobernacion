@@ -1,14 +1,55 @@
-import { Sidebar } from './components/Sidebar';
-import { Transcripcion } from './pages/Transcripcion';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+// Layouts
+import DashboardLayout from './layouts/DashboardLayout';
+
+// Páginas
+import Login from './pages/Login';
+import DashboardHome from './pages/DashboardHome';
+import Transcripcion from './pages/Transcripcion';
+import GestionUsuarios from './pages/GestionUsuarios';
+import Geografia from './pages/Geografia'; // <--- 1. AQUÍ IMPORTAMOS EL ARCHIVO NUEVO
+
+// Componente temporal para Resultados
+const ResultadosPublicos = () => (
+  <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+    <h1 className="text-4xl font-bold text-[#E31E24]">RESULTADOS EN VIVO (TV)</h1>
+  </div>
+);
 
 function App() {
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <Transcripcion />
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        
+        <Route path="/" element={<Login />} />
+        <Route path="/resultados-en-vivo" element={<ResultadosPublicos />} />
+
+        
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          
+          
+          <Route index element={<DashboardHome />} />
+          
+          
+          <Route path="transcripcion" element={<Transcripcion />} />
+          <Route path="usuarios" element={<GestionUsuarios />} />
+          
+          
+          <Route path="geografia" element={<Geografia />} />
+          
+          
+          
+          <Route path="partidos" element={<div className="p-10">🚧 Página de Partidos en Construcción</div>} />
+          <Route path="supervision" element={<div className="p-10">🚧 Página de Supervisión en Construcción</div>} />
+
+        </Route>
+
+        
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

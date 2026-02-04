@@ -1,9 +1,35 @@
-@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  font-family: 'Inter', sans-serif;
+  --primary-red: #ff0008;
+  --primary-gold: #ffa307;
+  --primary-white: #fefefe;
+  --red-dark: #cc0006;
+  --gold-dark: #cc8206;
+  --gray-900: #212121;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900;
+  font-family: 'Work Sans', sans-serif;
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--red-dark) 50%, var(--gray-900) 100%);
+  min-height: 100vh;
+}
+
+
+.bg-animated-pattern::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255, 163, 7, 0.2) 0%, transparent 70%);
+  animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
 }
