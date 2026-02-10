@@ -2,14 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ChevronDown, BarChart3, User, LockKeyhole } from 'lucide-react';
 
-
-import { login, me, permissions } from '../api/auth';
-
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-
- 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,28 +14,45 @@ const Login = () => {
     rol: 'Administrador',
   });
 
-  
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      // 1) login -> obtiene cookies/sesión
-      await login(formData.nombre_usuario, formData.contrasena);
+      const API_URL = import.meta.env.VITE_API_URL;
 
-      // 2) trae usuario y permisos reales
-      const user = await me();
-      const perms = await permissions();
+      // Llamar al backend para login
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre_usuario: formData.nombre_usuario,
+          contrasena: formData.contrasena
+        })
+      });
 
-      // 3) guarda en localStorage 
-      localStorage.setItem('usuario', JSON.stringify(user));
-      localStorage.setItem('permisos', JSON.stringify(perms));
+      const data = await response.json();
 
-      // 4) navega al dashboard
-      navigate('/dashboard');
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
+      if (data.success) {
+        // Guardar token y usuario en localStorage
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('usuario', JSON.stringify(data.data.usuario));
+
+        // Navegar al dashboard
+        navigate('/dashboard');
+      } else {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
     } catch (err) {
-      setError(err?.message || 'Error al iniciar sesión');
+      setError(err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }
@@ -137,7 +149,7 @@ const Login = () => {
               </div>
             </div>
 
-            {}
+            { }
             {error && (
               <div className="bg-black/20 border border-white/20 text-white text-xs p-3 rounded-xl">
                 {error}
@@ -149,9 +161,8 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full bg-white text-[#E31E24] font-black py-3.5 rounded-xl hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl uppercase tracking-widest text-xs transform hover:-translate-y-0.5 ${
-                  loading ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
+                className={`w-full bg-white text-[#E31E24] font-black py-3.5 rounded-xl hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl uppercase tracking-widest text-xs transform hover:-translate-y-0.5 ${loading ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
               >
                 {loading ? 'Ingresando...' : 'Iniciar Sesión'}
               </button>
