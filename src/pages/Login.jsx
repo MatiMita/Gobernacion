@@ -130,24 +130,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* SELECTOR DE ROLES */}
-            <div>
-              <label className={labelClasses}>Rol de Acceso</label>
-              <div className="relative">
-                <select
-                  value={formData.rol}
-                  onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
-                  className={`${inputClasses} pl-4 appearance-none cursor-pointer pr-10`}
-                >
-                  <option value="Administrador">Administrador del Sistema</option>
-                  <option value="Operador">Operador (Transcriptor)</option>
-                  <option value="Supervisor">Supervisor (Jefe de Grupo)</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-red-600">
-                  <ChevronDown size={20} strokeWidth={3} />
-                </div>
-              </div>
-            </div>
 
             { }
             {error && (
