@@ -755,22 +755,21 @@ router.get('/acta/:id', async (req, res) => {
 // GET /api/votos/resultados-vivo - Obtener resultados en tiempo real
 router.get('/resultados-vivo', async (req, res) => {
     try {
-        // Obtener votos agregados por frente político
+        // Obtener votos agregados por frente político y tipo de cargo
         const resultadosQuery = await pool.query(`
             SELECT 
                 f.id_frente,
                 f.nombre,
                 f.siglas,
                 f.color,
-                SUM(v.cantidad) as total_votos,
-                SUM(CASE WHEN v.tipo_cargo = 'gobernador' THEN v.cantidad ELSE 0 END) as votos_gobernador,
-                SUM(CASE WHEN v.tipo_cargo = 'asambleista_territorio' THEN v.cantidad ELSE 0 END) as votos_asambleista_territorio,
-                SUM(CASE WHEN v.tipo_cargo = 'asambleista_poblacion' THEN v.cantidad ELSE 0 END) as votos_asambleista_poblacion,
+                COALESCE(SUM(v.cantidad), 0) as total_votos,
+                COALESCE(SUM(CASE WHEN v.tipo_cargo = 'gobernador' THEN v.cantidad ELSE 0 END), 0) as votos_gobernador,
+                COALESCE(SUM(CASE WHEN v.tipo_cargo = 'asambleista_territorio' THEN v.cantidad ELSE 0 END), 0) as votos_asambleista_territorio,
+                COALESCE(SUM(CASE WHEN v.tipo_cargo = 'asambleista_poblacion' THEN v.cantidad ELSE 0 END), 0) as votos_asambleista_poblacion,
                 COUNT(DISTINCT v.id_acta) as actas_con_votos
             FROM frente_politico f
             LEFT JOIN voto v ON f.id_frente = v.id_frente
             GROUP BY f.id_frente, f.nombre, f.siglas, f.color
-            HAVING SUM(v.cantidad) > 0
             ORDER BY total_votos DESC
         `);
 
@@ -778,11 +777,20 @@ router.get('/resultados-vivo', async (req, res) => {
         const resumenQuery = await pool.query(`
             SELECT 
                 COUNT(*) as total_actas,
-                SUM(votos_totales) as total_votos,
-                SUM(votos_nulos) as votos_nulos,
-                SUM(votos_blancos) as votos_blancos,
+                COALESCE(SUM(votos_totales), 0) as total_votos,
+                COALESCE(SUM(votos_nulos), 0) as votos_nulos,
+                COALESCE(SUM(votos_blancos), 0) as votos_blancos,
                 COUNT(CASE WHEN estado = 'validada' THEN 1 END) as actas_validadas
             FROM acta
+        `);
+
+        // Calcular totales por tipo de cargo
+        const totalesPorCargo = await pool.query(`
+            SELECT 
+                SUM(CASE WHEN tipo_cargo = 'gobernador' THEN cantidad ELSE 0 END) as total_gobernador,
+                SUM(CASE WHEN tipo_cargo = 'asambleista_territorio' THEN cantidad ELSE 0 END) as total_asambleista_territorio,
+                SUM(CASE WHEN tipo_cargo = 'asambleista_poblacion' THEN cantidad ELSE 0 END) as total_asambleista_poblacion
+            FROM voto
         `);
 
         const resumen = resumenQuery.rows[0] || {
@@ -791,6 +799,12 @@ router.get('/resultados-vivo', async (req, res) => {
             votos_nulos: 0,
             votos_blancos: 0,
             actas_validadas: 0
+        };
+
+        const totalesCargo = totalesPorCargo.rows[0] || {
+            total_gobernador: 0,
+            total_asambleista_territorio: 0,
+            total_asambleista_poblacion: 0
         };
 
         res.json({
@@ -802,7 +816,12 @@ router.get('/resultados-vivo', async (req, res) => {
                     totalVotos: parseInt(resumen.total_votos) || 0,
                     votosNulos: parseInt(resumen.votos_nulos) || 0,
                     votosBlancos: parseInt(resumen.votos_blancos) || 0,
-                    actasValidadas: parseInt(resumen.actas_validadas) || 0
+                    actasValidadas: parseInt(resumen.actas_validadas) || 0,
+                    totalesPorCargo: {
+                        gobernador: parseInt(totalesCargo.total_gobernador) || 0,
+                        asambleistaTerritorio: parseInt(totalesCargo.total_asambleista_territorio) || 0,
+                        asambleistaPoblacion: parseInt(totalesCargo.total_asambleista_poblacion) || 0
+                    }
                 }
             }
         });
