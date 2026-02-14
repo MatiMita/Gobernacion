@@ -1,1 +1,1 @@
-# 🗳️ Sistema Electoral Subnacional - Colcapirhua 2026
+Sistema de registro y control de voto
