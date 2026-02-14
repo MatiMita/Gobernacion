@@ -41,14 +41,14 @@ const DashboardHome = () => {
               <p className="text-gray-600">Resumen rápido del sistema y accesos directos.</p>
             </div>
             <div className="flex gap-3">
-              <button 
+              <button
                 className="flex items-center gap-2 bg-gray-300 text-gray-500 px-6 py-2.5 rounded-lg font-medium cursor-not-allowed"
                 disabled
               >
                 <Vote className="w-5 h-5" />
                 Ver votos
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/dashboard/usuarios')}
                 className="flex items-center gap-2 bg-gray-200 text-gray-800 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition"
               >
@@ -61,30 +61,30 @@ const DashboardHome = () => {
 
         {/* Tarjetas de estadísticas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <StatCard 
-            title="USUARIOS" 
-            value="1" 
+          <StatCard
+            title="USUARIOS"
+            value="1"
             subtitle="Registrados"
             icon={<Users className="w-8 h-8" />}
-            bgColor="bg-[#E31E24]"
+            bgColor="bg-[#00008B]"
           />
-          <StatCard 
-            title="ROLES" 
-            value="2" 
+          <StatCard
+            title="ROLES"
+            value="2"
             subtitle="Spatie"
             icon={<Shield className="w-8 h-8" />}
             bgColor="bg-yellow-500"
           />
-          <StatCard 
-            title="TIPOS DE ELECCIÓN" 
-            value="0" 
+          <StatCard
+            title="TIPOS DE ELECCIÓN"
+            value="0"
             subtitle="Catálogo"
             icon={<Vote className="w-8 h-8" />}
-            bgColor="bg-[#E31E24]"
+            bgColor="bg-[#00008B]"
           />
-          <StatCard 
-            title="MESAS" 
-            value="0" 
+          <StatCard
+            title="MESAS"
+            value="0"
             subtitle="Registradas"
             icon={<Grid3x3 className="w-8 h-8" />}
             bgColor="bg-yellow-500"
@@ -97,17 +97,17 @@ const DashboardHome = () => {
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-2">Accesos rápidos</h2>
             <p className="text-sm text-gray-600 mb-6">Ir directo a módulos</p>
-            
+
             <div className="grid grid-cols-2 gap-4">
-              <QuickAccessButton 
+              <QuickAccessButton
                 icon={<Users className="w-6 h-6" />}
                 title="Usuarios"
                 subtitle="Gestionar cuentas"
-                bgColor="bg-pink-50"
-                iconColor="text-pink-600"
+                bgColor="bg-blue-50"
+                iconColor="text-[#00008B]"
                 onClick={() => navigate('/dashboard/usuarios')}
               />
-              <QuickAccessButton 
+              <QuickAccessButton
                 icon={<Shield className="w-6 h-6" />}
                 title="Roles"
                 subtitle="Permisos / perfiles"
@@ -115,7 +115,7 @@ const DashboardHome = () => {
                 iconColor="text-gray-400"
                 disabled
               />
-              <QuickAccessButton 
+              <QuickAccessButton
                 icon={<Vote className="w-6 h-6" />}
                 title="Tipo elección"
                 subtitle="Administrar catálogo"
@@ -123,15 +123,15 @@ const DashboardHome = () => {
                 iconColor="text-gray-400"
                 disabled
               />
-              <QuickAccessButton 
+              <QuickAccessButton
                 icon={<MapPin className="w-6 h-6" />}
                 title="Geográfico"
                 subtitle="Depto / provincia"
-                bgColor="bg-pink-50"
-                iconColor="text-pink-600"
+                bgColor="bg-blue-50"
+                iconColor="text-[#00008B]"
                 onClick={() => navigate('/dashboard/geografia')}
               />
-              <QuickAccessButton 
+              <QuickAccessButton
                 icon={<Grid3x3 className="w-6 h-6" />}
                 title="Mesas"
                 subtitle="Registro y control"
@@ -139,7 +139,7 @@ const DashboardHome = () => {
                 iconColor="text-gray-400"
                 disabled
               />
-              <QuickAccessButton 
+              <QuickAccessButton
                 icon={<Vote className="w-6 h-6" />}
                 title="Votos"
                 subtitle="Ver y registrar"
@@ -154,7 +154,7 @@ const DashboardHome = () => {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-2">Resumen</h2>
             <p className="text-sm text-gray-600 mb-6">Estado del sistema</p>
-            
+
             <div className="space-y-4 mb-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Fecha / hora</span>
@@ -180,7 +180,7 @@ const DashboardHome = () => {
             </div>
 
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={() => navigate('/dashboard/geografia')}
                 className="w-full flex items-center justify-between bg-gray-100 hover:bg-gray-200 px-4 py-3 rounded-lg transition group"
               >
@@ -190,7 +190,7 @@ const DashboardHome = () => {
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
               </button>
-              <button 
+              <button
                 disabled
                 className="w-full flex items-center justify-between bg-gray-200 px-4 py-3 rounded-lg cursor-not-allowed opacity-50"
               >
@@ -211,7 +211,7 @@ const DashboardHome = () => {
               <h2 className="text-lg font-bold text-gray-900">Últimos votos</h2>
               <p className="text-sm text-gray-600">Últimos registros (si aplica)</p>
             </div>
-            <button 
+            <button
               disabled
               className="text-gray-400 font-medium text-sm cursor-not-allowed flex items-center gap-1"
             >
@@ -219,7 +219,7 @@ const DashboardHome = () => {
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -262,14 +262,13 @@ const StatCard = ({ title, value, subtitle, icon, bgColor }) => (
 
 // Componente de botón de acceso rápido
 const QuickAccessButton = ({ icon, title, subtitle, bgColor, iconColor, onClick, disabled }) => (
-  <button 
+  <button
     onClick={onClick}
     disabled={disabled}
-    className={`flex items-start gap-3 p-4 rounded-lg border border-gray-200 transition group text-left ${
-      disabled 
-        ? 'cursor-not-allowed opacity-50' 
-        : 'hover:border-gray-300 hover:shadow-sm'
-    }`}
+    className={`flex items-start gap-3 p-4 rounded-lg border border-gray-200 transition group text-left ${disabled
+      ? 'cursor-not-allowed opacity-50'
+      : 'hover:border-gray-300 hover:shadow-sm'
+      }`}
   >
     <div className={`${bgColor} ${iconColor} p-2 rounded-lg ${!disabled && 'group-hover:scale-110'} transition`}>
       {icon}

@@ -199,7 +199,7 @@ const GestionUsuarios = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">
-            <span className="w-2 h-8 bg-red-600 rounded-full"></span>
+            <span className="w-2 h-8 bg-[#00008B] rounded-full"></span>
             Directorio De Usuarios
           </h1>
           <p className="text-gray-500 mt-1 ml-4 text-sm">Gestión de accesos del sistema</p>
@@ -207,7 +207,7 @@ const GestionUsuarios = () => {
 
         <button
           onClick={() => abrirModal()}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all"
+          className="bg-[#00008B] hover:bg-[#00006B] text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all"
         >
           <Plus size={18} /> Nuevo Usuario
         </button>
@@ -218,7 +218,7 @@ const GestionUsuarios = () => {
         {loading ? (
           <div className="p-10 text-center text-gray-500">Cargando usuarios...</div>
         ) : error && usuarios.length === 0 ? (
-          <div className="p-10 text-center text-red-500">{error}</div>
+          <div className="p-10 text-center text-[#00008B]">{error}</div>
         ) : (
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -231,11 +231,11 @@ const GestionUsuarios = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {usuarios.map((u) => (
-                <tr key={u.id_usuario} className="hover:bg-red-50/10 transition group">
+                <tr key={u.id_usuario} className="hover:bg-blue-50/10 transition group">
                   {/* Usuario */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="bg-red-100 p-2 rounded-full text-red-600">
+                      <div className="bg-blue-100 p-2 rounded-full text-[#00008B]">
                         <UserCircle size={20} />
                       </div>
                       <span className="font-bold text-gray-800">@{u.nombre_usuario}</span>
@@ -256,9 +256,8 @@ const GestionUsuarios = () => {
                   {/* Estado */}
                   <td className="px-6 py-4 text-center">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        u.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${u.activo ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-[#00008B]'
+                        }`}
                     >
                       {u.activo ? 'ACTIVO' : 'INACTIVO'}
                     </span>
@@ -284,7 +283,7 @@ const GestionUsuarios = () => {
                         e.stopPropagation();
                         eliminarUsuario(u);
                       }}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                      className="p-2 text-gray-400 hover:text-[#00008B] hover:bg-blue-50 rounded transition"
                       title="Desactivar usuario"
                     >
                       <Trash2 size={16} />
@@ -302,9 +301,9 @@ const GestionUsuarios = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Header Modal */}
-            <div className="sticky top-0 bg-red-600 text-white px-6 py-4 flex justify-between items-center rounded-t-2xl">
+            <div className="sticky top-0 bg-[#00008B] text-white px-6 py-4 flex justify-between items-center rounded-t-2xl">
               <h2 className="text-xl font-bold">{modoEdicion ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h2>
-              <button onClick={cerrarModal} className="hover:bg-red-700 p-2 rounded-full transition">
+              <button onClick={cerrarModal} className="hover:bg-[#00006B] p-2 rounded-full transition">
                 <X size={20} />
               </button>
             </div>
@@ -312,7 +311,7 @@ const GestionUsuarios = () => {
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="bg-blue-50 border border-blue-200 text-[#00008B] px-4 py-3 rounded-lg text-sm">
                   {error}
                 </div>
               )}
@@ -331,7 +330,7 @@ const GestionUsuarios = () => {
                       value={nuevoUsuario.nombre_usuario}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00008B] focus:border-transparent"
                       placeholder="Ej: jperez"
                     />
                   </div>
@@ -346,7 +345,7 @@ const GestionUsuarios = () => {
                       value={nuevoUsuario.contrasena}
                       onChange={handleInputChange}
                       required={!modoEdicion}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00008B] focus:border-transparent"
                       placeholder={modoEdicion ? 'Dejar vacío para mantener la actual' : '••••••••'}
                     />
                     {modoEdicion && (
@@ -362,7 +361,7 @@ const GestionUsuarios = () => {
                     value={nuevoUsuario.id_rol}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00008B] focus:border-transparent"
                   >
                     <option value="">Seleccione un rol</option>
                     {roles.map((rol) => (
@@ -386,15 +385,15 @@ const GestionUsuarios = () => {
                 <button
                   type="submit"
                   disabled={guardando}
-                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-6 py-3 bg-[#00008B] text-white rounded-lg font-semibold hover:bg-[#00006B] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {guardando
                     ? modoEdicion
                       ? 'Actualizando...'
                       : 'Creando...'
                     : modoEdicion
-                    ? 'Actualizar Usuario'
-                    : 'Crear Usuario'}
+                      ? 'Actualizar Usuario'
+                      : 'Crear Usuario'}
                 </button>
               </div>
             </form>
