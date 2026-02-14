@@ -63,8 +63,6 @@ const HistorialActas = () => {
             const data = await response.json();
             
             if (data.success) {
-                console.log(' Detalle del acta cargada:', data.data);
-                console.log(' Distrito:', data.data.acta.nombre_geografico);
                 setActaSeleccionada(data.data);
                 setMostrarDetalle(true);
             }
