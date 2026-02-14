@@ -316,20 +316,7 @@ const HistorialActas = () => {
                             />
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-5 h-5 text-gray-400" />
-                        <select
-                            value={filtroEstado}
-                            onChange={(e) => setFiltroEstado(e.target.value)}
-                            className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-600 focus:outline-none"
-                        >
-                            <option value="todos">Todos los estados</option>
-                            <option value="registrada">Registradas</option>
-                            <option value="validada">Validadas</option>
-                            <option value="rechazada">Rechazadas</option>
-                            <option value="pendiente">Pendientes</option>
-                        </select>
-                    </div>
+                    
                 </div>
             </div>
 
