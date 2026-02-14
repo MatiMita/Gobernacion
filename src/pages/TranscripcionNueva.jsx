@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Save,
     Plus,
@@ -18,6 +18,43 @@ import {
     Vote,
     Camera
 } from 'lucide-react';
+
+// Componente VotoCard fuera del componente principal para evitar re-renders
+const VotoCard = React.memo(({ frente, tipo, onUpdate }) => {
+    const handleChange = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, '');
+        onUpdate(tipo, frente.id_frente, parseInt(value) || 0);
+    };
+
+    return (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all hover:border-[#F59E0B]">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div 
+                        className="w-10 h-10 rounded-lg flex-shrink-0 shadow-sm" 
+                        style={{ backgroundColor: frente.color }}
+                    />
+                    <div className="min-w-0">
+                        <p className="font-bold text-gray-900 truncate">{frente.siglas}</p>
+                        <p className="text-xs text-gray-500 truncate">{frente.nombre}</p>
+                    </div>
+                </div>
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    value={frente.cantidad || ''}
+                    onChange={handleChange}
+                    className="w-20 text-center text-xl font-bold border border-gray-300 rounded-lg py-2 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] focus:outline-none"
+                    placeholder="0"
+                />
+            </div>
+        </div>
+    );
+}, (prevProps, nextProps) => {
+    // Solo re-renderizar si cambia la cantidad del frente
+    return prevProps.frente.cantidad === nextProps.frente.cantidad &&
+           prevProps.frente.id_frente === nextProps.frente.id_frente;
+});
 
 const Transcripcion = () => {
     const [showModal, setShowModal] = useState(false);
@@ -195,14 +232,14 @@ const Transcripcion = () => {
         setCurrentStep(4);
     };
 
-    const updateVotos = (tipo, idFrente, value) => {
+    const updateVotos = useCallback((tipo, idFrente, value) => {
         const setVotos = tipo === 'gobernador' ? setVotosGobernador : 
                          tipo === 'asambleista_territorio' ? setVotosAsambleistaT : 
                          setVotosAsambleistaP;
         setVotos(prev => prev.map(v =>
             v.id_frente === idFrente ? { ...v, cantidad: Math.max(0, value) } : v
         ));
-    };
+    }, []);
     
     const handleImagenChange = (e) => {
         const file = e.target.files[0];
@@ -307,34 +344,6 @@ const Transcripcion = () => {
     const totalVotosAsambleistaT = votosAsambleistaT.reduce((sum, v) => sum + v.cantidad, 0);
     const totalVotosAsambleistaP = votosAsambleistaP.reduce((sum, v) => sum + v.cantidad, 0);
     const totalGeneral = totalVotosGobernador + totalVotosAsambleistaT + totalVotosAsambleistaP + votosNulos + votosBlancos;
-
-    const VotoCard = ({ frente, tipo }) => (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all hover:border-[#F59E0B]">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div 
-                        className="w-10 h-10 rounded-lg flex-shrink-0 shadow-sm" 
-                        style={{ backgroundColor: frente.color }}
-                    />
-                    <div className="min-w-0">
-                        <p className="font-bold text-gray-900 truncate">{frente.siglas}</p>
-                        <p className="text-xs text-gray-500 truncate">{frente.nombre}</p>
-                    </div>
-                </div>
-                <input
-                    type="text"
-                    inputMode="numeric"
-                    value={frente.cantidad || ''}
-                    onChange={(e) => {
-                        const value = e.target.value.replace(/[^0-9]/g, '');
-                        updateVotos(tipo, frente.id_frente, parseInt(value) || 0);
-                    }}
-                    className="w-20 text-center text-xl font-bold border border-gray-300 rounded-lg py-2 focus:border-[#1E3A8A] focus:ring-1 focus:ring-[#1E3A8A] focus:outline-none"
-                    placeholder="0"
-                />
-            </div>
-        </div>
-    );
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -640,7 +649,7 @@ const Transcripcion = () => {
                                         </div>
                                         <div className="space-y-2">
                                             {votosGobernador.map(frente => (
-                                                <VotoCard key={`gob-${frente.id_frente}`} frente={frente} tipo="gobernador" />
+                                                <VotoCard key={`gob-${frente.id_frente}`} frente={frente} tipo="gobernador" onUpdate={updateVotos} />
                                             ))}
                                         </div>
                                     </div>
@@ -656,7 +665,7 @@ const Transcripcion = () => {
                                         </div>
                                         <div className="space-y-2">
                                             {votosAsambleistaT.map(frente => (
-                                                <VotoCard key={`ast-${frente.id_frente}`} frente={frente} tipo="asambleista_territorio" />
+                                                <VotoCard key={`ast-${frente.id_frente}`} frente={frente} tipo="asambleista_territorio" onUpdate={updateVotos} />
                                             ))}
                                         </div>
                                     </div>
@@ -672,7 +681,7 @@ const Transcripcion = () => {
                                         </div>
                                         <div className="space-y-2">
                                             {votosAsambleistaP.map(frente => (
-                                                <VotoCard key={`asp-${frente.id_frente}`} frente={frente} tipo="asambleista_poblacion" />
+                                                <VotoCard key={`asp-${frente.id_frente}`} frente={frente} tipo="asambleista_poblacion" onUpdate={updateVotos} />
                                             ))}
                                         </div>
                                     </div>

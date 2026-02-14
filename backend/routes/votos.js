@@ -466,12 +466,12 @@ router.post('/registrar-acta', verificarToken, uploadActa.single('imagen_acta'),
             throw new Error('El ID de mesa es requerido');
         }
 
-        // Calcular totales
+        // Calcular totales - Sumamos todos los votos de todos los cargos
         const votosValidosGobernador = votos_gobernador?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
         const votosValidosAsambleistaT = votos_asambleista_territorio?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
         const votosValidosAsambleistaP = votos_asambleista_poblacion?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
         const votosValidos = votosValidosGobernador + votosValidosAsambleistaT + votosValidosAsambleistaP;
-        const votosTotales = votosValidos + (votos_nulos || 0) + (votos_blancos || 0);
+        const votosTotales = votosValidos + (parseInt(votos_nulos) || 0) + (parseInt(votos_blancos) || 0);
 
         // Insertar acta
         const actaResult = await client.query(`
@@ -593,12 +593,12 @@ router.put('/acta/:id', verificarToken, async (req, res) => {
             throw new Error('Acta no encontrada');
         }
 
-        // Calcular totales
+        // Calcular totales - Sumamos todos los votos de todos los cargos
         const votosValidosGobernador = votos_gobernador?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
         const votosValidosAsambleistaT = votos_asambleista_territorio?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
         const votosValidosAsambleistaP = votos_asambleista_poblacion?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
         const votosValidos = votosValidosGobernador + votosValidosAsambleistaT + votosValidosAsambleistaP;
-        const votosTotales = votosValidos + (votos_nulos || 0) + (votos_blancos || 0);
+        const votosTotales = votosValidos + (parseInt(votos_nulos) || 0) + (parseInt(votos_blancos) || 0);
 
         // Actualizar el acta existente
         await client.query(`

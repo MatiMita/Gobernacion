@@ -637,6 +637,37 @@ const HistorialActas = () => {
                                             ))}
                                     </div>
                                 </div>
+
+                                {/* Votos Nulos y Blancos */}
+                                <div className="mt-6">
+                                    <h4 className="text-md font-semibold text-gray-700 mb-3">Votos Nulos y Blancos</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-bold text-gray-900">Votos Nulos</p>
+                                                    <p className="text-sm text-gray-600">Votos no válidos</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-3xl font-black text-red-600">{actaSeleccionada.acta.votos_nulos || 0}</p>
+                                                    <p className="text-sm text-gray-600">votos</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-gray-100 border-2 border-gray-300 rounded-xl p-4">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-bold text-gray-900">Votos en Blanco</p>
+                                                    <p className="text-sm text-gray-600">Sin selección</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-3xl font-black text-gray-600">{actaSeleccionada.acta.votos_blancos || 0}</p>
+                                                    <p className="text-sm text-gray-600">votos</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Observaciones */}
