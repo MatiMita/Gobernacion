@@ -261,25 +261,6 @@ const ResultadosEnVivo = () => {
                         </div>
                         <p className="text-4xl font-black text-[#F59E0B]">{resumen.totalVotos.toLocaleString()}</p>
                     </div>
-
-                    <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-[#10B981]">
-                        <div className="flex items-center gap-3 mb-2">
-                            <CheckCircle className="w-6 h-6 text-[#10B981]" />
-                            <span className="text-gray-600 font-semibold">Validadas</span>
-                        </div>
-                        <p className="text-4xl font-black text-[#10B981]">{resumen.actasValidadas}</p>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-[#1E3A8A]">
-                        <div className="flex items-center gap-3 mb-2">
-                            <TrendingUp className="w-6 h-6 text-[#1E3A8A]" />
-                            <span className="text-gray-600 font-semibold">Participación</span>
-                        </div>
-                        <p className="text-4xl font-black text-[#1E3A8A]">
-                            {resumen.totalActas > 0 ? 
-                                ((resumen.actasValidadas / resumen.totalActas) * 100).toFixed(1) : '0'}%
-                        </p>
-                    </div>
                 </div>
             </div>
 
