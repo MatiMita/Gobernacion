@@ -45,8 +45,9 @@ const Transcripcion = () => {
     const [selectedMesa, setSelectedMesa] = useState(null);
 
     // Votos
-    const [votosAlcalde, setVotosAlcalde] = useState([]);
-    const [votosConcejal, setVotosConcejal] = useState([]);
+    const [votosGobernador, setVotosGobernador] = useState([]);
+    const [votosAsambleistaT, setVotosAsambleistaT] = useState([]);
+    const [votosAsambleistaP, setVotosAsambleistaP] = useState([]);
     const [votosNulos, setVotosNulos] = useState(0);
     const [votosBlancos, setVotosBlancos] = useState(0);
     const [observaciones, setObservaciones] = useState('');
@@ -155,8 +156,9 @@ const Transcripcion = () => {
                     color: f.color,
                     cantidad: 0
                 }));
-                setVotosAlcalde(votosIniciales);
-                setVotosConcejal(JSON.parse(JSON.stringify(votosIniciales)));
+                setVotosGobernador(votosIniciales);
+                setVotosAsambleistaT(JSON.parse(JSON.stringify(votosIniciales)));
+                setVotosAsambleistaP(JSON.parse(JSON.stringify(votosIniciales)));
             }
         } catch (error) {
             console.error('Error al cargar frentes:', error);
@@ -194,7 +196,9 @@ const Transcripcion = () => {
     };
 
     const updateVotos = (tipo, idFrente, value) => {
-        const setVotos = tipo === 'alcalde' ? setVotosAlcalde : setVotosConcejal;
+        const setVotos = tipo === 'gobernador' ? setVotosGobernador : 
+                         tipo === 'asambleista_territorio' ? setVotosAsambleistaT : 
+                         setVotosAsambleistaP;
         setVotos(prev => prev.map(v =>
             v.id_frente === idFrente ? { ...v, cantidad: Math.max(0, value) } : v
         ));
@@ -239,8 +243,9 @@ const Transcripcion = () => {
             formData.append('votos_nulos', votosNulos);
             formData.append('votos_blancos', votosBlancos);
             formData.append('observaciones', observaciones);
-            formData.append('votos_alcalde', JSON.stringify(votosAlcalde.filter(v => v.cantidad > 0)));
-            formData.append('votos_concejal', JSON.stringify(votosConcejal.filter(v => v.cantidad > 0)));
+            formData.append('votos_gobernador', JSON.stringify(votosGobernador.filter(v => v.cantidad > 0)));
+            formData.append('votos_asambleista_territorio', JSON.stringify(votosAsambleistaT.filter(v => v.cantidad > 0)));
+            formData.append('votos_asambleista_poblacion', JSON.stringify(votosAsambleistaP.filter(v => v.cantidad > 0)));
             
             if (imagenActa) {
                 formData.append('imagen_acta', imagenActa);
@@ -292,14 +297,16 @@ const Transcripcion = () => {
                 color: f.color,
                 cantidad: 0
             }));
-            setVotosAlcalde(votosIniciales);
-            setVotosConcejal(votosIniciales);
+            setVotosGobernador(votosIniciales);
+            setVotosAsambleistaT(votosIniciales);
+            setVotosAsambleistaP(votosIniciales);
         }
     };
 
-    const totalVotosAlcalde = votosAlcalde.reduce((sum, v) => sum + v.cantidad, 0);
-    const totalVotosConcejal = votosConcejal.reduce((sum, v) => sum + v.cantidad, 0);
-    const totalGeneral = totalVotosAlcalde + totalVotosConcejal + votosNulos + votosBlancos;
+    const totalVotosGobernador = votosGobernador.reduce((sum, v) => sum + v.cantidad, 0);
+    const totalVotosAsambleistaT = votosAsambleistaT.reduce((sum, v) => sum + v.cantidad, 0);
+    const totalVotosAsambleistaP = votosAsambleistaP.reduce((sum, v) => sum + v.cantidad, 0);
+    const totalGeneral = totalVotosGobernador + totalVotosAsambleistaT + totalVotosAsambleistaP + votosNulos + votosBlancos;
 
     const VotoCard = ({ frente, tipo }) => (
         <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all hover:border-[#F59E0B]">
@@ -622,34 +629,50 @@ const Transcripcion = () => {
                                         </div>
                                     </div>
 
-                                    {/* Votos Alcalde */}
+                                    {/* Votos Gobernador */}
                                     <div className="mb-6">
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-6 bg-[#1E3A8A] rounded"></div>
-                                            <h3 className="font-semibold text-gray-900">Votos para Alcalde</h3>
+                                            <h3 className="font-semibold text-gray-900">Votos para Gobernador(a)</h3>
                                             <span className="text-xs text-gray-500 ml-auto">
-                                                Total: {totalVotosAlcalde}
+                                                Total: {totalVotosGobernador}
                                             </span>
                                         </div>
                                         <div className="space-y-2">
-                                            {votosAlcalde.map(frente => (
-                                                <VotoCard key={`alc-${frente.id_frente}`} frente={frente} tipo="alcalde" />
+                                            {votosGobernador.map(frente => (
+                                                <VotoCard key={`gob-${frente.id_frente}`} frente={frente} tipo="gobernador" />
                                             ))}
                                         </div>
                                     </div>
 
-                                    {/* Votos Concejal */}
+                                    {/* Votos Asambleista por Territorio */}
                                     <div className="mb-6">
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className="w-1 h-6 bg-[#F59E0B] rounded"></div>
-                                            <h3 className="font-semibold text-gray-900">Votos para Concejales</h3>
+                                            <h3 className="font-semibold text-gray-900">Votos para Asambleista por Territorio</h3>
                                             <span className="text-xs text-gray-500 ml-auto">
-                                                Total: {totalVotosConcejal}
+                                                Total: {totalVotosAsambleistaT}
                                             </span>
                                         </div>
                                         <div className="space-y-2">
-                                            {votosConcejal.map(frente => (
-                                                <VotoCard key={`con-${frente.id_frente}`} frente={frente} tipo="concejal" />
+                                            {votosAsambleistaT.map(frente => (
+                                                <VotoCard key={`ast-${frente.id_frente}`} frente={frente} tipo="asambleista_territorio" />
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Votos Asambleista por Población */}
+                                    <div className="mb-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="w-1 h-6 bg-[#10B981] rounded"></div>
+                                            <h3 className="font-semibold text-gray-900">Votos para Asambleista por Población</h3>
+                                            <span className="text-xs text-gray-500 ml-auto">
+                                                Total: {totalVotosAsambleistaP}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {votosAsambleistaP.map(frente => (
+                                                <VotoCard key={`asp-${frente.id_frente}`} frente={frente} tipo="asambleista_poblacion" />
                                             ))}
                                         </div>
                                     </div>
