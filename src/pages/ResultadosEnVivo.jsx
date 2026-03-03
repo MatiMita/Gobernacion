@@ -19,43 +19,38 @@ import {
 
 /* ─── Animaciones globales inyectadas una sola vez ─── */
 const STYLE = `
-@keyframes rise { from { width: 0; opacity:0; } to { opacity:1; } }
-@keyframes riseUp { from { height: 0; opacity:0; } to { opacity:1; } }
-@keyframes float {
-  0%,100% { transform: translateY(0);   }
-  50%      { transform: translateY(-7px); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
-@keyframes slideInUp {
-  from { opacity:0; transform: translateY(24px); }
-  to   { opacity:1; transform: translateY(0); }
-}
+@keyframes rise    { from { width: 0; opacity:0; } to { opacity:1; } }
+@keyframes riseUp  { from { height: 0; opacity:0; } to { opacity:1; } }
+@keyframes float   { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+@keyframes shimmer { 0%{ background-position:-200% center; } 100%{ background-position:200% center; } }
+@keyframes slideInUp { from{ opacity:0; transform:translateY(24px); } to{ opacity:1; transform:translateY(0); } }
 @keyframes glow-blue {
-  0%,100% { box-shadow: 0 0 16px rgba(30,58,138,.25); }
-  50%      { box-shadow: 0 0 32px rgba(30,58,138,.5), 0 0 48px rgba(30,58,138,.15); }
+  0%,100% { box-shadow: 0 0 16px rgba(30,58,138,.2); }
+  50%      { box-shadow: 0 0 32px rgba(30,58,138,.5), 0 0 56px rgba(30,58,138,.15); }
 }
 @keyframes glow-gold {
-  0%,100% { box-shadow: 0 0 16px rgba(245,158,11,.3); }
-  50%      { box-shadow: 0 0 32px rgba(245,158,11,.65), 0 0 48px rgba(245,158,11,.2); }
+  0%,100% { box-shadow: 0 0 14px rgba(245,158,11,.25); }
+  50%      { box-shadow: 0 0 28px rgba(245,158,11,.6), 0 0 44px rgba(245,158,11,.2); }
 }
-@keyframes bounce-dot {
-  0%,100% { transform: translateY(0) scale(1);   }
-  40%      { transform: translateY(-5px) scale(1.2); }
-}
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-@keyframes pop-in {
-  0%   { transform: scale(0); opacity:0; }
-  80%  { transform: scale(1.1); }
-  100% { transform: scale(1);   opacity:1; }
+@keyframes bounce-dot { 0%,100%{ transform:translateY(0) scale(1); } 40%{ transform:translateY(-5px) scale(1.2); } }
+@keyframes spin-slow  { to { transform: rotate(360deg); } }
+@keyframes pop-in     { 0%{ transform:scale(0); opacity:0; } 80%{ transform:scale(1.1); } 100%{ transform:scale(1); opacity:1; } }
+@keyframes pulse-bar  { 0%,100%{ opacity:1; } 50%{ opacity:.75; } }
+@keyframes tada {
+  0%,100% { transform:scale(1) rotate(0); }
+  15%     { transform:scale(1.12) rotate(-4deg); }
+  30%     { transform:scale(1.12) rotate(4deg); }
+  45%     { transform:scale(1.12) rotate(-3deg); }
+  60%     { transform:scale(1.12) rotate(3deg); }
+  75%     { transform:scale(1.06) rotate(-1deg); }
 }
 .bar-animate    { animation: rise .85s cubic-bezier(.22,1,.36,1) forwards; }
-.bar-up         { animation: riseUp 1s cubic-bezier(.22,1,.36,1) forwards; }
+.bar-up         { animation: riseUp 1.1s cubic-bezier(.22,1,.36,1) forwards; }
 .float-anim     { animation: float 3s ease-in-out infinite; }
 .glow-winner    { animation: glow-blue 2.5s ease-in-out infinite; }
 .glow-gold-anim { animation: glow-gold 2.5s ease-in-out infinite; }
+.pulse-bar-win  { animation: pulse-bar 2s ease-in-out infinite; }
+.tada-anim      { animation: tada 1.2s ease .4s both; }
 .shimmer-blue {
   background: linear-gradient(90deg,#1E3A8A 0%,#60a5fa 40%,#1E3A8A 60%,#60a5fa 100%);
   background-size: 200% auto;
@@ -64,7 +59,7 @@ const STYLE = `
   animation: shimmer 3s linear infinite;
 }
 .bounce-dot { animation: bounce-dot 1.2s ease-in-out infinite; }
-.spin-slow  { animation: spin-slow 8s linear infinite; }
+.spin-slow  { animation: spin-slow 10s linear infinite; }
 .pop-in     { animation: pop-in .45s cubic-bezier(.36,1.56,.64,1) forwards; }
 `;
 
@@ -93,6 +88,7 @@ const ResultadosEnVivo = () => {
     const [error, setError] = useState(null);
     const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
     const [animKey, setAnimKey] = useState(0);   // fuerza re-animación al cambiar cargo
+    const [donutReady, setDonutReady] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -184,11 +180,18 @@ const ResultadosEnVivo = () => {
         return () => clearInterval(interval);
     }, []);
 
-    /* Fuerza re-animación de barras cuando cambia el cargo */
+    /* Fuerza re-animación de barras y donut cuando cambia el cargo */
     const cambiarCargo = (cargo) => {
         setCargoActivo(cargo);
+        setDonutReady(false);
         setAnimKey(k => k + 1);
     };
+
+    useEffect(() => {
+        setDonutReady(false);
+        const t = setTimeout(() => setDonutReady(true), 180);
+        return () => clearTimeout(t);
+    }, [animKey]);
 
     const calcularPorcentaje = (votos, total) => {
         if (!total || total === 0) return '0.00';
@@ -398,86 +401,337 @@ const ResultadosEnVivo = () => {
                     ) : (
                         <>
                             {/* ── TÍTULO CARGO ── */}
-                            <div className="text-center">
+                            <div className="text-center" style={{ animation: 'slideInUp .4s ease both' }}>
                                 <h2 className="text-2xl md:text-3xl font-black text-[#1E3A8A] mb-1 flex items-center justify-center gap-3">
-                                    <Trophy className="w-7 h-7 text-[#F59E0B]" />
+                                    <Trophy className="w-7 h-7 text-[#F59E0B] tada-anim" />
                                     {cfg.label}
-                                    <Trophy className="w-7 h-7 text-[#F59E0B]" />
+                                    <Trophy className="w-7 h-7 text-[#F59E0B] tada-anim" style={{ animationDelay: '.6s' }} />
                                 </h2>
-                                <p className="text-gray-400 text-sm">
-                                    {totalActivo.toLocaleString()} votos computados
-                                </p>
+                                <p className="text-gray-400 text-sm">{totalActivo.toLocaleString()} votos computados</p>
                             </div>
 
-                            {/* ── PODIO TOP 3 ── */}
-                            {activos.length >= 2 && (
-                                <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-8">
-                                    <h3 className="text-center text-gray-400 text-xs font-bold uppercase tracking-widest mb-8 flex items-center justify-center gap-2">
-                                        <span className="h-px flex-1 bg-blue-100" />
-                                        Podio de Líderes
-                                        <span className="h-px flex-1 bg-blue-100" />
-                                    </h3>
-                                    <div className="flex items-end justify-center gap-4 md:gap-8">
-                                        {[
-                                            activos[1],
-                                            activos[0],
-                                            activos[2],
-                                        ].filter(Boolean).map((frente, vi) => {
-                                            const realIdx = activos.indexOf(frente);
-                                            const med     = getMedalla(realIdx);
-                                            const heights = ['150px','190px','120px'];
+                            {/* ── GRÁFICO DE COLUMNAS VERTICALES — todos los partidos ── */}
+                            <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-6 md:p-8"
+                                key={`cols-${animKey}`}>
+                                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <span className="h-px flex-1 bg-blue-100" />
+                                    Comparativa de Partidos
+                                    <span className="h-px flex-1 bg-blue-100" />
+                                </h3>
+                                {/* Área del gráfico */}
+                                <div className="relative">
+                                    {/* Líneas de referencia horizontales */}
+                                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none" style={{ bottom: '56px', top: 0 }}>
+                                        {[100, 75, 50, 25].map(v => (
+                                            <div key={v} className="flex items-center gap-2">
+                                                <span className="text-[10px] text-gray-300 w-6 text-right flex-shrink-0">{v}%</span>
+                                                <div className="flex-1 border-t border-dashed border-slate-200" />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Columnas */}
+                                    <div className="flex items-end gap-1 pl-8 pb-14" style={{ height: '220px' }}>
+                                        {activos.map((frente, index) => {
                                             const votos   = frente.votos || 0;
-                                            const pct     = calcularPorcentaje(votos, totalActivo);
+                                            const pct     = parseFloat(calcularPorcentaje(votos, totalActivo));
+                                            const barH    = maxVotos > 0 ? (votos / maxVotos) * 100 : 0;
                                             const color   = frente.color || cfg.accent;
+                                            const isFirst = index === 0;
+                                            const med     = getMedalla(index);
+                                            /* Ancho proporcional: entre 28px y 80px según cantidad */
+                                            const colW    = Math.max(28, Math.min(80, Math.floor(780 / Math.max(activos.length, 1))));
 
                                             return (
                                                 <div key={frente.id_frente}
-                                                    className="flex flex-col items-center gap-3 flex-1 max-w-[200px]"
-                                                    style={{ animation: `slideInUp .5s ease ${vi * .15}s both` }}
+                                                    className="relative flex flex-col items-center justify-end h-full"
+                                                    style={{ width: `${colW}px`, flexShrink: 0, animation: `slideInUp .35s ease ${index * .06}s both` }}
                                                 >
-                                                    {/* Estrella flotante para el 1° */}
-                                                    {realIdx === 0 && (
-                                                        <div className="float-anim">
-                                                            <Star className="w-8 h-8 text-[#F59E0B] fill-[#F59E0B]" />
-                                                        </div>
-                                                    )}
+                                                    {/* Valor encima */}
+                                                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
+                                                        style={{ animation: `slideInUp .4s ease ${index * .07 + .2}s both`, opacity: 0 }}>
+                                                        <span className="text-[10px] font-black" style={{ color }}>{pct}%</span>
+                                                    </div>
 
-                                                    {/* Badge posición */}
-                                                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shadow-lg text-white pop-in"
+                                                    {/* Columna */}
+                                                    <div className="relative w-full rounded-t-xl overflow-hidden"
+                                                        style={{
+                                                            height: `${barH}%`,
+                                                            minHeight: votos > 0 ? '6px' : '0',
+                                                            background: `linear-gradient(to top, ${color}, ${color}99)`,
+                                                            animation: `riseUp ${0.8 + index * 0.07}s cubic-bezier(.22,1,.36,1) ${index * 0.06}s both`,
+                                                            boxShadow: isFirst ? `0 -4px 20px ${color}55` : 'none',
+                                                        }}
+                                                    >
+                                                        {isFirst && <div className="absolute inset-0 rounded-t-xl glow-winner opacity-60" />}
+                                                    </div>
+
+                                                    {/* Etiqueta inferior */}
+                                                    <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 w-full">
+                                                        {/* Medalla */}
+                                                        {index < 3 && (
+                                                            <div className="w-4 h-4 rounded-full flex items-center justify-center text-white font-black flex-shrink-0 pop-in"
+                                                                style={{ fontSize: '8px', backgroundColor: med.color, animationDelay: `${index * .08}s` }}>
+                                                                {med.label}
+                                                            </div>
+                                                        )}
+                                                        <span className="text-[10px] font-bold text-[#1E3A8A] truncate text-center leading-tight"
+                                                            style={{ maxWidth: `${colW + 4}px` }}>
+                                                            {frente.siglas}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* ── BARRAS HORIZONTALES — arriba, grosor adaptable ── */}
+                            <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-6 md:p-8"
+                                key={`bars-${animKey}`}>
+                                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2">
+                                    <span className="h-px flex-1 bg-blue-100" />
+                                    Distribución de Votos
+                                    <span className="h-px flex-1 bg-blue-100" />
+                                </h3>
+                                <div className="space-y-2.5">
+                                    {activos.map((frente, index) => {
+                                        const votos   = frente.votos || 0;
+                                        const pct     = parseFloat(calcularPorcentaje(votos, totalActivo));
+                                        const barW    = maxVotos > 0 ? (votos / maxVotos) * 100 : 0;
+                                        const med     = getMedalla(index);
+                                        const color   = frente.color || cfg.accent;
+                                        const isFirst = index === 0;
+                                        /* Grosor adaptable: más partidos → barra más delgada */
+                                        const barH    = Math.max(22, Math.min(50, Math.floor(260 / Math.max(activos.length, 1))));
+
+                                        return (
+                                            <div key={frente.id_frente}
+                                                style={{ animation: `slideInUp .35s ease ${index * .06}s both` }}>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black text-white flex-shrink-0 pop-in"
+                                                            style={{ backgroundColor: med.color, animationDelay: `${index * .07}s` }}>
+                                                            {med.label}
+                                                        </div>
+                                                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                                                        <span className={`font-bold text-sm truncate max-w-[120px] md:max-w-none ${isFirst ? 'text-[#1E3A8A]' : 'text-gray-600'}`}>
+                                                            {frente.siglas}
+                                                        </span>
+                                                        <span className="text-gray-300 text-xs hidden md:inline truncate max-w-[160px]">{frente.nombre}</span>
+                                                        {isFirst && (
+                                                            <span className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white flex-shrink-0"
+                                                                style={{ background: '#F59E0B' }}>
+                                                                <Crown className="w-2.5 h-2.5" /> LÍDER
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right flex-shrink-0 ml-3">
+                                                        <span className="font-black text-base" style={{ color }}>{pct}%</span>
+                                                        <span className="text-gray-400 text-xs ml-1.5">{votos.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="relative bg-slate-100 rounded-full overflow-hidden border border-slate-200"
+                                                    style={{ height: `${barH}px` }}>
+                                                    <div className={`bar-animate absolute left-0 top-0 bottom-0 rounded-full flex items-center justify-end pr-3 ${isFirst ? 'pulse-bar-win' : ''}`}
+                                                        style={{
+                                                            width: `${barW}%`,
+                                                            background: isFirst
+                                                                ? `linear-gradient(90deg, ${color}99, ${color})`
+                                                                : `linear-gradient(90deg, ${color}55, ${color}bb)`,
+                                                            animationDuration: `${0.75 + index * 0.07}s`,
+                                                            animationDelay: `${index * 0.07}s`,
+                                                            boxShadow: isFirst ? `0 0 14px ${color}55` : 'none',
+                                                            minWidth: votos > 0 ? '28px' : '0'
+                                                        }}>
+                                                        {barW > 14 && (
+                                                            <span className="text-white text-xs font-bold drop-shadow">{votos.toLocaleString()}</span>
+                                                        )}
+                                                    </div>
+                                                    {barW > 0 && barW <= 14 && (
+                                                        <span className="absolute top-1/2 -translate-y-1/2 text-gray-500 text-xs"
+                                                            style={{ left: `calc(${barW}% + 6px)` }}>
+                                                            {votos.toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* ── TORTA SVG + TARJETAS en dos columnas ── */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                                {/* Donut chart */}
+                                <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-6 flex flex-col items-center"
+                                    key={`donut-${animKey}`}>
+                                    <h3 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2 w-full">
+                                        <span className="h-px flex-1 bg-blue-100" />
+                                        Gráfico de Torta
+                                        <span className="h-px flex-1 bg-blue-100" />
+                                    </h3>
+                                    {(() => {
+                                        const R = 80;
+                                        const C = 2 * Math.PI * R;
+                                        let cum = 0;
+                                        return (
+                                            <div className="relative">
+                                                <svg viewBox="0 0 220 220" width="220" height="220"
+                                                    style={{ transform: 'rotate(-90deg)' }}>
+                                                    {/* Track gris */}
+                                                    <circle cx="110" cy="110" r={R}
+                                                        fill="none" stroke="#f1f5f9" strokeWidth="38" />
+                                                    {activos.map((frente, i) => {
+                                                        const votos = frente.votos || 0;
+                                                        const frac  = totalActivo > 0 ? votos / totalActivo : 0;
+                                                        const dash  = donutReady ? frac * C : 0;
+                                                        const offset = -(cum * C);
+                                                        cum += frac;
+                                                        const color = frente.color || cfg.accent;
+                                                        return (
+                                                            <circle key={i}
+                                                                cx="110" cy="110" r={R}
+                                                                fill="none"
+                                                                stroke={color}
+                                                                strokeWidth="38"
+                                                                strokeDasharray={`${dash} ${C}`}
+                                                                strokeDashoffset={offset}
+                                                                style={{ transition: `stroke-dasharray ${0.7 + i * 0.12}s cubic-bezier(.22,1,.36,1) ${i * 0.07}s`, filter: i === 0 ? `drop-shadow(0 0 6px ${color}88)` : 'none' }}
+                                                            />
+                                                        );
+                                                    })}
+                                                </svg>
+                                                {/* Texto central */}
+                                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                    <p className="text-xs text-gray-400 font-semibold">Total</p>
+                                                    <p className="text-lg font-black text-[#1E3A8A]">{totalActivo.toLocaleString()}</p>
+                                                    <p className="text-xs text-gray-400">votos</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                    {/* Leyenda */}
+                                    <div className="mt-4 w-full grid grid-cols-2 gap-x-4 gap-y-1.5">
+                                        {activos.map((frente, i) => {
+                                            const votos = frente.votos || 0;
+                                            const pct   = calcularPorcentaje(votos, totalActivo);
+                                            const color = frente.color || cfg.accent;
+                                            return (
+                                                <div key={i} className="flex items-center gap-1.5"
+                                                    style={{ animation: `slideInUp .3s ease ${i * .05}s both` }}>
+                                                    <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+                                                    <span className="font-bold text-gray-600 text-xs truncate flex-1">{frente.siglas}</span>
+                                                    <span className="font-black text-xs flex-shrink-0" style={{ color }}>{pct}%</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Tarjetas */}
+                                <div className="grid grid-cols-2 gap-3 content-start">
+                                    {activos.map((frente, index) => {
+                                        const votos   = frente.votos || 0;
+                                        const pct     = calcularPorcentaje(votos, totalActivo);
+                                        const med     = getMedalla(index);
+                                        const color   = frente.color || cfg.accent;
+                                        const isFirst = index === 0;
+                                        return (
+                                            <div key={frente.id_frente}
+                                                className="relative bg-white rounded-2xl border shadow-md hover:shadow-xl hover:scale-[1.03] transition-all duration-300 overflow-hidden"
+                                                style={{
+                                                    borderColor: isFirst ? `${color}55` : '#e2e8f0',
+                                                    boxShadow: isFirst ? `0 6px 24px ${color}20` : undefined,
+                                                    animation: `slideInUp .4s ease ${index * .06}s both`
+                                                }}>
+                                                {/* Franja top */}
+                                                <div className="h-1.5" style={{ background: `linear-gradient(90deg, ${color}99, ${color})` }} />
+                                                <div className="p-3">
+                                                    <div className="absolute -top-2.5 -right-2.5 w-8 h-8 rounded-full flex items-center justify-center shadow-lg font-black text-xs text-white pop-in"
+                                                        style={{ background: med.color, animationDelay: `${index * .08}s` }}>
+                                                        {med.label}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs text-white shadow-md"
+                                                            style={{ background: `linear-gradient(135deg, ${color}, ${color}99)` }}>
+                                                            {frente.siglas?.slice(0,2) || index + 1}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-black text-[#1E3A8A] text-xs truncate">{frente.siglas}</p>
+                                                            <p className="text-gray-400 text-[10px] truncate">{frente.nombre}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-end justify-between">
+                                                        <div>
+                                                            <p className="text-xl font-black leading-none" style={{ color }}>{pct}%</p>
+                                                            <p className="text-gray-400 text-[10px] mt-0.5">{votos.toLocaleString()} votos</p>
+                                                        </div>
+                                                        {isFirst && <Crown className="w-5 h-5 text-[#F59E0B] fill-[#F59E0B] float-anim" />}
+                                                    </div>
+                                                    <div className="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                                        <div className="h-full rounded-full bar-animate"
+                                                            style={{
+                                                                width: `${(votos / maxVotos) * 100}%`,
+                                                                background: `linear-gradient(90deg, ${color}88, ${color})`,
+                                                                animationDuration: `${0.7 + index * 0.1}s`
+                                                            }} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* ── PODIO TOP 3 — al final ── */}
+                            {activos.length >= 2 && (
+                                <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-8">
+                                    <h3 className="text-center text-gray-400 text-xs font-bold uppercase tracking-widest mb-8 flex items-center justify-center gap-3">
+                                        <span className="h-px flex-1 bg-blue-100" />
+                                        <span className="flex items-center gap-1.5">
+                                            <Trophy className="w-4 h-4 text-[#F59E0B]" /> Podio de Líderes <Trophy className="w-4 h-4 text-[#F59E0B]" />
+                                        </span>
+                                        <span className="h-px flex-1 bg-blue-100" />
+                                    </h3>
+                                    <div className="flex items-end justify-center gap-4 md:gap-10">
+                                        {[activos[1], activos[0], activos[2]].filter(Boolean).map((frente, vi) => {
+                                            const realIdx = activos.indexOf(frente);
+                                            const med     = getMedalla(realIdx);
+                                            const heights = ['155px','205px','125px'];
+                                            const votos   = frente.votos || 0;
+                                            const pct     = calcularPorcentaje(votos, totalActivo);
+                                            const color   = frente.color || cfg.accent;
+                                            return (
+                                                <div key={frente.id_frente}
+                                                    className="flex flex-col items-center gap-2 flex-1 max-w-[190px]"
+                                                    style={{ animation: `slideInUp .55s ease ${vi * .15}s both` }}>
+                                                    {realIdx === 0 && (
+                                                        <div className="float-anim"><Star className="w-9 h-9 text-[#F59E0B] fill-[#F59E0B]" /></div>
+                                                    )}
+                                                    <div className="w-11 h-11 rounded-full flex items-center justify-center font-black text-sm shadow-xl text-white pop-in"
                                                         style={{ backgroundColor: med.color, animationDelay: `${vi * .2}s` }}>
                                                         {med.label}
                                                     </div>
-
-                                                    {/* Nombre */}
                                                     <div className="text-center">
-                                                        <p className="font-black text-[#1E3A8A] text-base leading-tight">{frente.siglas}</p>
+                                                        <p className="font-black text-[#1E3A8A] text-sm">{frente.siglas}</p>
                                                         <p className="text-gray-400 text-xs line-clamp-1">{frente.nombre}</p>
                                                     </div>
-
-                                                    {/* Porcentaje */}
                                                     <div className="text-center">
                                                         <p className="text-2xl font-black" style={{ color }}>{pct}%</p>
                                                         <p className="text-gray-400 text-xs">{votos.toLocaleString()} votos</p>
                                                     </div>
-
-                                                    {/* Columna del podio */}
                                                     <div className="w-full rounded-t-2xl relative overflow-hidden"
-                                                        style={{
-                                                            height: heights[vi],
-                                                            background: '#f1f5f9',
-                                                            border: `2px solid ${color}33`
-                                                        }}
-                                                    >
+                                                        style={{ height: heights[vi], background: '#f1f5f9', border: `2px solid ${color}33` }}>
                                                         <div className="absolute bottom-0 left-0 right-0 rounded-t-2xl"
                                                             style={{
-                                                                background: `linear-gradient(to top, ${color}, ${color}88)`,
+                                                                background: `linear-gradient(to top, ${color}, ${color}99)`,
                                                                 height: '100%',
-                                                                animation: `riseUp 1s cubic-bezier(.22,1,.36,1) ${vi * .2}s both`
-                                                            }}
-                                                        />
-                                                        {realIdx === 0 && (
-                                                            <div className="absolute inset-0 rounded-t-2xl glow-winner" />
-                                                        )}
+                                                                animation: `riseUp 1.1s cubic-bezier(.22,1,.36,1) ${vi * .18}s both`
+                                                            }} />
+                                                        {realIdx === 0 && <div className="absolute inset-0 rounded-t-2xl glow-winner" />}
                                                     </div>
                                                 </div>
                                             );
@@ -486,177 +740,22 @@ const ResultadosEnVivo = () => {
                                 </div>
                             )}
 
-                            {/* ── GRÁFICO DE BARRAS HORIZONTALES ── */}
-                            <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-6 md:p-8 space-y-5"
-                                key={animKey}
-                            >
-                                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
-                                    <span className="h-px flex-1 bg-blue-100" />
-                                    Distribución de Votos
-                                    <span className="h-px flex-1 bg-blue-100" />
-                                </h3>
-
-                                {activos.map((frente, index) => {
-                                    const votos   = frente.votos || 0;
-                                    const pct     = parseFloat(calcularPorcentaje(votos, totalActivo));
-                                    const barW    = maxVotos > 0 ? (votos / maxVotos) * 100 : 0;
-                                    const med     = getMedalla(index);
-                                    const color   = frente.color || cfg.accent;
-                                    const isFirst = index === 0;
-
-                                    return (
-                                        <div key={frente.id_frente}
-                                            className="group"
-                                            style={{ animation: `slideInUp .4s ease ${index * .08}s both` }}
-                                        >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center gap-3">
-                                                    {/* Posición */}
-                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-md flex-shrink-0 text-white"
-                                                        style={{ backgroundColor: med.color }}>
-                                                        {med.label}
-                                                    </div>
-
-                                                    {/* Dot + nombre */}
-                                                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                                                    <div>
-                                                        <span className={`font-black text-sm ${isFirst ? 'text-[#1E3A8A]' : 'text-gray-700'}`}>
-                                                            {frente.siglas}
-                                                        </span>
-                                                        <span className="text-gray-400 text-xs ml-2 hidden md:inline">
-                                                            {frente.nombre}
-                                                        </span>
-                                                    </div>
-
-                                                    {isFirst && (
-                                                        <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                                                            style={{ background: '#F59E0B' }}>
-                                                            <Crown className="w-3 h-3" /> LÍDER
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                <div className="text-right flex-shrink-0 ml-4">
-                                                    <span className="font-black text-lg" style={{ color }}>{pct}%</span>
-                                                    <span className="text-gray-400 text-xs ml-2">{votos.toLocaleString()}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Barra */}
-                                            <div className="relative h-9 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                                                <div className="bar-animate absolute left-0 top-0 bottom-0 rounded-full flex items-center justify-end pr-3"
-                                                    style={{
-                                                        width: `${barW}%`,
-                                                        background: isFirst
-                                                            ? `linear-gradient(90deg, ${color}99, ${color})`
-                                                            : `linear-gradient(90deg, ${color}66, ${color}bb)`,
-                                                        animationDuration: `${0.8 + index * 0.1}s`,
-                                                        animationDelay: `${index * 0.1}s`,
-                                                        boxShadow: isFirst ? `0 0 16px ${color}55` : 'none',
-                                                        minWidth: votos > 0 ? '36px' : '0'
-                                                    }}
-                                                >
-                                                    {barW > 18 && (
-                                                        <span className="text-white text-xs font-bold drop-shadow">
-                                                            {votos.toLocaleString()}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                {barW > 0 && barW <= 18 && (
-                                                    <span className="absolute top-1/2 -translate-y-1/2 text-gray-500 text-xs"
-                                                        style={{ left: `calc(${barW}% + 8px)` }}>
-                                                        {votos.toLocaleString()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {/* ── TARJETAS DE RESULTADOS DETALLADAS ── */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                                {activos.map((frente, index) => {
-                                    const votos   = frente.votos || 0;
-                                    const pct     = calcularPorcentaje(votos, totalActivo);
-                                    const med     = getMedalla(index);
-                                    const color   = frente.color || cfg.accent;
-                                    const isFirst = index === 0;
-
-                                    return (
-                                        <div key={frente.id_frente}
-                                            className="relative bg-white rounded-2xl border shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
-                                            style={{
-                                                borderColor: isFirst ? `${color}55` : '#e2e8f0',
-                                                boxShadow: isFirst ? `0 8px 32px ${color}20` : undefined,
-                                                animation: `slideInUp .4s ease ${index * .07}s both`
-                                            }}
-                                        >
-                                            {/* Franja de color superior */}
-                                            <div className="h-1.5 rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
-
-                                            <div className="p-5">
-                                                {/* Medalla esquina */}
-                                                <div className="absolute -top-3 -right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-black text-xs text-white pop-in"
-                                                    style={{ background: med.color, animationDelay: `${index * .1}s` }}>
-                                                    {med.label}
-                                                </div>
-
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-base text-white shadow-md"
-                                                        style={{ background: `linear-gradient(135deg, ${color}, ${color}99)` }}>
-                                                        {frente.siglas?.slice(0,2) || index + 1}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-black text-[#1E3A8A] text-sm truncate">{frente.siglas}</p>
-                                                        <p className="text-gray-400 text-xs truncate">{frente.nombre}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-end justify-between">
-                                                    <div>
-                                                        <p className="text-3xl font-black" style={{ color }}>{pct}%</p>
-                                                        <p className="text-gray-400 text-xs mt-0.5">{votos.toLocaleString()} votos</p>
-                                                    </div>
-                                                    {isFirst && <Crown className="w-8 h-8 text-[#F59E0B] fill-[#F59E0B] float-anim" />}
-                                                </div>
-
-                                                {/* Mini barra */}
-                                                <div className="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
-                                                    <div className="h-full rounded-full bar-animate"
-                                                        style={{
-                                                            width: `${(votos / maxVotos) * 100}%`,
-                                                            background: `linear-gradient(90deg, ${color}88, ${color})`,
-                                                            animationDuration: `${0.7 + index * 0.1}s`
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
                             {/* ── VOTOS NULOS Y BLANCOS ── */}
                             {(resumen.votosNulos > 0 || resumen.votosBlancos > 0) && (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm">
+                                    <div className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all">
                                         <p className="text-red-500 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
                                             <span className="w-2 h-2 bg-red-500 rounded-full bounce-dot" /> Votos Nulos
                                         </p>
                                         <p className="text-3xl font-black text-red-600">{resumen.votosNulos.toLocaleString()}</p>
-                                        <p className="text-red-400 text-xs mt-1">
-                                            {calcularPorcentaje(resumen.votosNulos, resumen.totalVotos)}% del total
-                                        </p>
+                                        <p className="text-red-400 text-xs mt-1">{calcularPorcentaje(resumen.votosNulos, resumen.totalVotos)}% del total</p>
                                     </div>
-                                    <div className="bg-white border border-amber-200 rounded-2xl p-5 shadow-sm">
+                                    <div className="bg-white border border-amber-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all">
                                         <p className="text-amber-600 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
                                             <span className="w-2 h-2 bg-[#F59E0B] rounded-full bounce-dot" style={{ animationDelay: '.3s' }} /> Votos Blancos
                                         </p>
                                         <p className="text-3xl font-black text-amber-600">{resumen.votosBlancos.toLocaleString()}</p>
-                                        <p className="text-amber-400 text-xs mt-1">
-                                            {calcularPorcentaje(resumen.votosBlancos, resumen.totalVotos)}% del total
-                                        </p>
+                                        <p className="text-amber-400 text-xs mt-1">{calcularPorcentaje(resumen.votosBlancos, resumen.totalVotos)}% del total</p>
                                     </div>
                                 </div>
                             )}
