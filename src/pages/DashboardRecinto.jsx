@@ -121,15 +121,15 @@ const DashboardRecinto = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#1E3A8A] to-[#152a63] rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#1E3A8A] to-[#152a63] rounded-2xl flex items-center justify-center shadow-lg">
             {esJefeRecinto ? <MapPin className="w-8 h-8 text-white" /> : <Grid3x3 className="w-8 h-8 text-white" />}
           </div>
           <div>
-            <h1 className="text-3xl font-black text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900">
               {esJefeRecinto ? 'Panel de Recinto' : 'Panel de Mesa'}
             </h1>
             <p className="text-gray-600 mt-1">
@@ -144,15 +144,15 @@ const DashboardRecinto = () => {
         {/* Información del Recinto o Mesa */}
         {esJefeRecinto && recintoInfo && (
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <p className="text-blue-100 text-sm font-medium mb-2">📍 RECINTO ASIGNADO</p>
-                <h2 className="text-2xl font-black mb-1">{recintoInfo.nombre}</h2>
+                <h2 className="text-xl sm:text-2xl font-black mb-1">{recintoInfo.nombre}</h2>
                 <p className="text-blue-100 text-sm">{recintoInfo.total_mesas} mesas electorales bajo tu supervisión</p>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 sm:px-6 sm:py-4 text-center">
                 <p className="text-blue-100 text-xs uppercase tracking-wide mb-1">Avance</p>
-                <p className="text-4xl font-black">{estadisticas.porcentaje_avance}%</p>
+                <p className="text-3xl sm:text-4xl font-black">{estadisticas.porcentaje_avance}%</p>
               </div>
             </div>
           </div>
@@ -176,7 +176,7 @@ const DashboardRecinto = () => {
       </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <StatCard
           title="Mesas Totales"
           value={estadisticas.total_mesas}

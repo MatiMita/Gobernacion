@@ -265,10 +265,10 @@ const HistorialActas = () => {
     };
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-black text-gray-900 mb-2">
+            <div className="mb-6 sm:mb-8">
+                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2">
                     Historial de Actas Registradas
                 </h1>
                 <p className="text-gray-600">
@@ -277,37 +277,37 @@ const HistorialActas = () => {
             </div>
 
             {/* Estadísticas */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white rounded-2xl shadow-sm p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
                     <div className="flex items-center gap-3 mb-2">
                         <FileText className="w-6 h-6 text-gray-600" />
                         <span className="text-gray-600 font-semibold">Total</span>
                     </div>
-                    <p className="text-4xl font-black text-gray-900">{estadisticas.total}</p>
+                    <p className="text-2xl sm:text-4xl font-black text-gray-900">{estadisticas.total}</p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm p-6">
+                <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
                     <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-6 h-6 text-blue-600" />
+                        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                         <span className="text-gray-600 font-semibold">Registradas</span>
                     </div>
-                    <p className="text-4xl font-black text-blue-600">{estadisticas.registradas}</p>
+                    <p className="text-2xl sm:text-4xl font-black text-blue-600">{estadisticas.registradas}</p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm p-6">
+                <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
                     <div className="flex items-center gap-3 mb-2">
-                        <CheckCircle className="w-6 h-6 text-green-600" />
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                         <span className="text-gray-600 font-semibold">Validadas</span>
                     </div>
-                    <p className="text-4xl font-black text-green-600">{estadisticas.validadas}</p>
+                    <p className="text-2xl sm:text-4xl font-black text-green-600">{estadisticas.validadas}</p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm p-6">
+                <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
                     <div className="flex items-center gap-3 mb-2">
-                        <TrendingUp className="w-6 h-6 text-purple-600" />
+                        <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                         <span className="text-gray-600 font-semibold">Votos Totales</span>
                     </div>
-                    <p className="text-4xl font-black text-purple-600">
+                    <p className="text-2xl sm:text-4xl font-black text-purple-600">
                         {actas.reduce((sum, a) => sum + (a.votos_totales || 0), 0).toLocaleString()}
                     </p>
                 </div>
@@ -349,44 +349,44 @@ const HistorialActas = () => {
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mesa</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Recinto</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Distrito</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Registrado por</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Fecha / Edición</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Votos</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Estado</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Acciones</th>
+                                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mesa</th>
+                                    <th className="hidden sm:table-cell px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Recinto</th>
+                                    <th className="hidden md:table-cell px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Distrito</th>
+                                    <th className="hidden lg:table-cell px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Registrado por</th>
+                                    <th className="hidden sm:table-cell px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Fecha / Edición</th>
+                                    <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Votos</th>
+                                    <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Estado</th>
+                                    <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {actasFiltradas.map((acta) => (
                                     <tr key={acta.id_acta} className="hover:bg-gray-50 transition">
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 sm:px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <Grid3x3 className="w-4 h-4 text-gray-400" />
                                                 <span className="font-bold text-gray-900">{acta.codigo_mesa}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden sm:table-cell px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <Building2 className="w-4 h-4 text-gray-400" />
                                                 <span className="text-sm text-gray-900">{acta.nombre_recinto || 'N/A'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden md:table-cell px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <MapPin className="w-4 h-4 text-gray-400" />
                                                 <span className="text-sm text-gray-600">{acta.nombre_geografico || 'N/A'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden lg:table-cell px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <User className="w-4 h-4 text-gray-400" />
                                                 <span className="text-sm text-gray-600">{acta.nombre_usuario}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden sm:table-cell px-6 py-4">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2">
                                                     <Calendar className="w-4 h-4 text-gray-400" />

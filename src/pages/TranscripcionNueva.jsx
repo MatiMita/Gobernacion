@@ -508,7 +508,7 @@ const Transcripcion = () => {
             {/* Contenido principal */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Mensaje de bienvenida */}
-                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-6 sm:p-12 text-center shadow-sm">
                     <div className="w-20 h-20 bg-gradient-to-br from-[#1E3A8A] to-[#152a63] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                         <ClipboardCheck className="w-10 h-10 text-white" />
                     </div>
@@ -518,7 +518,7 @@ const Transcripcion = () => {
                     <p className="text-gray-600 max-w-md mx-auto mb-8">
                         Selecciona "Nueva Acta" para comenzar el registro de resultados electorales
                     </p>
-                    <div className="flex justify-center gap-8">
+                    <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-[#1E3A8A] bg-opacity-10 rounded-full flex items-center justify-center">
                                 <MapPin className="w-5 h-5 text-[#1E3A8A]" />
@@ -553,7 +553,7 @@ const Transcripcion = () => {
             {/* Modal Wizard */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl my-8">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl my-4 sm:my-8">
                         
                         {/* Header del Modal - Versión simplificada para mesa asignada */}
                         {tieneMesaAsignada ? (
@@ -564,7 +564,7 @@ const Transcripcion = () => {
                                         
                                         {/* Información de la mesa asignada */}
                                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
                                                 <div>
                                                     <p className="text-white/70 text-xs mb-1">Distrito</p>
                                                     <p className="font-semibold">{selectedDistrito?.nombre}</p>

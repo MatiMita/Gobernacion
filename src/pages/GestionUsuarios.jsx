@@ -252,7 +252,7 @@ const GestionUsuarios = () => {
   };
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
+    <div className="p-4 sm:p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
       {/* HEADER con diseño mejorado */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -261,9 +261,9 @@ const GestionUsuarios = () => {
               <UserCircle className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-gray-900 flex items-center gap-2">
+              <h1 className="text-xl sm:text-3xl font-black text-gray-900 flex flex-wrap items-center gap-2">
                 Directorio De Usuarios
-                <span className="text-sm font-normal text-gray-400 ml-2">({usuarios.length} registros)</span>
+                <span className="text-sm font-normal text-gray-400">({usuarios.length} registros)</span>
               </h1>
               <p className="text-gray-500 mt-1">Gestión de accesos y permisos del sistema</p>
             </div>
@@ -271,7 +271,7 @@ const GestionUsuarios = () => {
 
           <button
             onClick={() => abrirModal()}
-            className="bg-gradient-to-r from-[#1E3A8A] to-[#152a63] hover:from-[#152a63] hover:to-[#0f1f4a] text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+            className="bg-gradient-to-r from-[#1E3A8A] to-[#152a63] hover:from-[#152a63] hover:to-[#0f1f4a] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 w-full sm:w-auto justify-center"
           >
             <Plus size={18} /> Nuevo Usuario
           </button>

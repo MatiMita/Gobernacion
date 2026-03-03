@@ -198,16 +198,16 @@ const FrentesPoliticos = () => {
     }
 
     return (
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Frentes Políticos</h1>
-                    <p className="text-gray-600 mt-1">Gestión de partidos y frentes políticos</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Frentes Políticos</h1>
+                    <p className="text-gray-600 mt-1 text-sm sm:text-base">Gestión de partidos y frentes políticos</p>
                 </div>
                 <button
                     onClick={() => abrirModal()}
-                    className="bg-[#E31E24] hover:bg-[#C41A1F] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-lg"
+                    className="bg-[#E31E24] hover:bg-[#C41A1F] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg flex items-center gap-2 transition-colors shadow-lg text-sm sm:text-base w-full sm:w-auto justify-center"
                 >
                     <Plus size={20} />
                     Añadir Frente Político

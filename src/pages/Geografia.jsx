@@ -482,7 +482,7 @@ const Geografia = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 font-sans">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 font-sans">
             
             {/* Mensajes de notificación */}
             {error && (
@@ -521,7 +521,7 @@ const Geografia = () => {
                             </div>
                         </div>
                         
-                        <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                             {esAdmin && (
                                 <button
                                     onClick={abrirModalTipos}
@@ -687,12 +687,12 @@ const Geografia = () => {
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">#</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Padre</th>
-                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10 sm:w-16">#</th>
+                                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                        <th className="hidden sm:table-cell px-3 sm:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                        <th className="hidden md:table-cell px-3 sm:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Padre</th>
+                                        <th className="px-3 sm:px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -715,7 +715,7 @@ const Geografia = () => {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                                     {reg.codigo ? (
                                                         <span className="text-sm text-gray-600 font-mono">{reg.codigo}</span>
                                                     ) : (
@@ -727,7 +727,7 @@ const Geografia = () => {
                                                         {reg.tipo}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
                                                     <span className="text-sm text-gray-600 group-hover:text-[#1E3A8A]">
                                                         {reg.nombre_padre || (
                                                             <span className="text-gray-400">Sin padre</span>

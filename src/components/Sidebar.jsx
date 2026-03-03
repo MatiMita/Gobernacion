@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, UserCircle, ChevronRight } from 'lucide-react';
+import { LogOut, UserCircle, ChevronRight, X } from 'lucide-react';
 import { MENU_ITEMS } from '../config/navigation';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,8 +16,29 @@ const Sidebar = () => {
   // Filtrar opciones de menu segun el rol
   const menuPermitido = MENU_ITEMS.filter(item => item.roles.includes(user.rol));
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    if (onClose) onClose(); // cerrar drawer en móvil al navegar
+  };
+
   return (
-    <aside className="w-80 bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 flex flex-col h-full z-30 font-sans shadow-xl">
+    <>
+      {/* Overlay oscuro solo en móvil */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72
+        bg-gradient-to-b from-white to-gray-50 border-r border-gray-200
+        flex flex-col h-full font-sans shadow-xl
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:relative md:translate-x-0 md:w-80 md:z-30
+      `}>
 
       {/* Encabezado Institucional con gradiente NGP */}
       <div className="h-20 flex items-center px-6 bg-gradient-to-r from-[#1E3A8A] to-[#152a63] relative overflow-hidden">
@@ -25,7 +46,7 @@ const Sidebar = () => {
         <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10"></div>
         <div className="absolute right-10 bottom-0 w-16 h-16 bg-[#F59E0B]/10 rounded-full"></div>
 
-        <div className="flex items-center gap-4 relative z-10">
+        <div className="flex items-center gap-4 relative z-10 flex-1">
           <div className="bg-white/10 backdrop-blur-sm p-2.5 rounded-xl shadow-lg border border-white/20">
             <span className="font-black text-lg tracking-widest text-white">NGP</span>
           </div>
@@ -37,6 +58,14 @@ const Sidebar = () => {
             </span>
           </div>
         </div>
+
+        {/* Botón cerrar — solo en móvil */}
+        <button
+          onClick={onClose}
+          className="md:hidden relative z-10 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors ml-2"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       {/* Tarjeta de Usuario con diseño mejorado */}
@@ -101,7 +130,7 @@ const Sidebar = () => {
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               className={`
                                 w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl 
                                 transition-all duration-200 text-sm font-medium group relative
@@ -138,7 +167,7 @@ const Sidebar = () => {
           onClick={() => {
             localStorage.removeItem('usuario');
             localStorage.removeItem('token');
-            navigate('/');
+            handleNavigate('/');
           }}
           className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 hover:border-[#F59E0B] hover:bg-[#F59E0B] hover:bg-opacity-5 hover:text-[#F59E0B] transition-all duration-200 text-sm font-bold group"
         >
@@ -162,6 +191,7 @@ const Sidebar = () => {
         </div>
       </div>
     </aside>
+    </>
   );
 };
 

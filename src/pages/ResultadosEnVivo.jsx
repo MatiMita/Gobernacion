@@ -61,6 +61,11 @@ const STYLE = `
 .bounce-dot { animation: bounce-dot 1.2s ease-in-out infinite; }
 .spin-slow  { animation: spin-slow 10s linear infinite; }
 .pop-in     { animation: pop-in .45s cubic-bezier(.36,1.56,.64,1) forwards; }
+/* Scrollbar del gráfico de comparativa */
+.chart-scroll::-webkit-scrollbar        { height: 6px; }
+.chart-scroll::-webkit-scrollbar-track  { background: #f1f5f9; border-radius: 9999px; }
+.chart-scroll::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 9999px; }
+.chart-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 `;
 
 const ResultadosEnVivo = () => {
@@ -289,7 +294,7 @@ const ResultadosEnVivo = () => {
                     <div className="absolute top-8 right-1/4 w-2 h-2 rounded-full bg-white/40 bounce-dot" style={{ animationDelay: '.3s' }} />
                     <div className="absolute bottom-4 right-1/2 w-2 h-2 rounded-full bg-[#F59E0B]/50 bounce-dot" style={{ animationDelay: '.6s' }} />
 
-                    <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             {/* Izquierda */}
                             <div className="flex items-center gap-4">
@@ -311,7 +316,7 @@ const ResultadosEnVivo = () => {
                                         </span>
                                         <span className="text-white/80 text-xs font-bold uppercase tracking-widest">En Vivo</span>
                                     </div>
-                                    <h1 className="text-3xl md:text-4xl font-black leading-tight shimmer-blue">
+                                <h1 className="text-2xl md:text-4xl font-black leading-tight shimmer-blue">
                                         Resultados en Vivo
                                     </h1>
                                     <p className="text-white/80 text-sm mt-1">
@@ -352,7 +357,7 @@ const ResultadosEnVivo = () => {
                 </div>
 
                 {/* ══════════════ SELECTOR DE CARGOS ══════════════ */}
-                <div className="max-w-7xl mx-auto px-6 mt-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 sm:mt-8">
                     <div className="bg-white rounded-2xl shadow-md border border-blue-100 p-4">
                         <div className="flex flex-wrap gap-3 justify-center">
                             {Object.entries(CARGO_CONFIG).map(([key, c]) => {
@@ -382,7 +387,7 @@ const ResultadosEnVivo = () => {
                 </div>
 
                 {/* ══════════════ CONTENIDO PRINCIPAL ══════════════ */}
-                <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
 
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-32 gap-4">
@@ -418,37 +423,54 @@ const ResultadosEnVivo = () => {
                                     <span className="h-px flex-1 bg-blue-100" />
                                 </h3>
 
-                                {/* Área del gráfico con líneas de referencia */}
-                                <div className="relative mx-auto" style={{ maxWidth: '100%' }}>
-                                    {/* Líneas de referencia y etiquetas de eje Y */}
-                                    <div className="relative" style={{ paddingLeft: '32px', paddingBottom: '64px' }}>
-                                        {/* Grid lines absolutas */}
-                                        <div className="absolute left-8 right-0 top-0" style={{ height: '200px' }}>
+                                {/* Área del gráfico con scroll horizontal cuando hay muchos partidos */}
+                                <div
+                                    className="overflow-x-auto pb-2 chart-scroll"
+                                    style={{ WebkitOverflowScrolling: 'touch' }}
+                                >
+                                    {/* Indicador de scroll: solo visible cuando desborda */}
+                                    {activos.length > 8 && (
+                                        <p className="text-[10px] text-gray-400 text-right mb-1 flex items-center justify-end gap-1 select-none">
+                                            <span>←</span> desliza para ver todos <span>→</span>
+                                        </p>
+                                    )}
+
+                                    {/* Contenedor interno con ancho mínimo garantizado */}
+                                    <div
+                                        className="relative"
+                                        style={{
+                                            paddingLeft: '36px',
+                                            paddingBottom: '88px',
+                                            /* 64px por columna + 14px gap + margen izquierdo */
+                                            minWidth: `${activos.length * 82 + 60}px`,
+                                        }}
+                                    >
+                                        {/* Grid lines absolutas — se extienden al ancho completo */}
+                                        <div className="absolute left-9 right-0 top-0" style={{ height: '200px' }}>
                                             {[0, 25, 50, 75, 100].map(v => (
                                                 <div key={v} className="absolute w-full flex items-center"
                                                     style={{ bottom: `${v * 2}px` }}>
-                                                    <span className="absolute -left-8 text-[9px] text-gray-300 font-semibold w-7 text-right">{v}%</span>
+                                                    <span className="absolute -left-9 text-[9px] text-gray-300 font-semibold w-8 text-right">{v}%</span>
                                                     <div className="w-full border-t border-dashed border-slate-100" />
                                                 </div>
                                             ))}
                                         </div>
 
-                                        {/* Columnas centradas con justify-center */}
-                                        <div className="flex items-end justify-center gap-3 md:gap-4" style={{ height: '200px' }}>
+                                        {/* Columnas — ancho fijo, centradas; scroll toma el control cuando desbordan */}
+                                        <div className="flex items-end justify-center gap-3.5" style={{ height: '200px' }}>
                                             {activos.map((frente, index) => {
                                                 const votos   = frente.votos || 0;
                                                 const pct     = parseFloat(calcularPorcentaje(votos, totalActivo));
-                                                const barH    = maxVotos > 0 ? (votos / maxVotos) * 200 : 0; /* px directos */
+                                                const barH    = maxVotos > 0 ? (votos / maxVotos) * 200 : 0;
                                                 const color   = frente.color || cfg.accent;
                                                 const isFirst = index === 0;
                                                 const med     = getMedalla(index);
-                                                /* Ancho adaptable: pocos → anchas, muchos → delgadas */
-                                                const colW = Math.max(24, Math.min(72, Math.floor(700 / Math.max(activos.length, 1))));
+                                                const colW    = 64; /* ancho fijo — el scroll se encarga del resto */
 
                                                 return (
                                                     <div key={frente.id_frente}
-                                                        className="relative flex flex-col items-center justify-end h-full"
-                                                        style={{ width: `${colW}px`, flexShrink: 0, animation: `slideInUp .35s ease ${index * .06}s both` }}
+                                                        className="relative flex flex-col items-center justify-end h-full flex-shrink-0"
+                                                        style={{ width: `${colW}px`, animation: `slideInUp .35s ease ${index * .06}s both` }}
                                                     >
                                                         {/* Porcentaje encima */}
                                                         <div className="absolute whitespace-nowrap text-center"
@@ -457,7 +479,7 @@ const ResultadosEnVivo = () => {
                                                         </div>
 
                                                         {/* Columna animada */}
-                                                        <div className="relative w-full rounded-t-xl overflow-hidden flex-shrink-0"
+                                                        <div className="relative w-full rounded-t-xl overflow-hidden"
                                                             style={{
                                                                 height: `${barH}px`,
                                                                 minHeight: votos > 0 ? '4px' : '0',
@@ -470,14 +492,27 @@ const ResultadosEnVivo = () => {
                                                         </div>
 
                                                         {/* Etiqueta inferior */}
-                                                        <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5" style={{ width: `${colW + 8}px` }}>
+                                                        <div className="absolute flex flex-col items-center gap-1"
+                                                            style={{ bottom: '-84px', left: '50%', transform: 'translateX(-50%)', width: `${colW + 12}px` }}>
                                                             {index < 3 && (
-                                                                <div className="w-4 h-4 rounded-full flex items-center justify-center text-white font-black pop-in"
-                                                                    style={{ fontSize: '7px', backgroundColor: med.color, animationDelay: `${index * .08}s`, flexShrink: 0 }}>
+                                                                <div className="w-5 h-5 rounded-full flex items-center justify-center text-white font-black pop-in flex-shrink-0 shadow-md"
+                                                                    style={{ fontSize: '8px', backgroundColor: med.color, animationDelay: `${index * .08}s` }}>
                                                                     {med.label}
                                                                 </div>
                                                             )}
-                                                            <span className="text-[10px] font-bold text-[#1E3A8A] text-center leading-tight w-full truncate">{frente.siglas}</span>
+                                                            {/* Badge con color del partido */}
+                                                            <div
+                                                                className="px-1.5 py-0.5 rounded-lg text-center w-full"
+                                                                style={{
+                                                                    backgroundColor: `${color}18`,
+                                                                    border: `1.5px solid ${color}55`,
+                                                                }}
+                                                            >
+                                                                <span
+                                                                    className="text-[11px] font-black leading-tight block"
+                                                                    style={{ color, overflowWrap: 'break-word', wordBreak: 'break-all' }}
+                                                                >{frente.siglas}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 );

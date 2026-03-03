@@ -20,7 +20,7 @@ const DashboardHome = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header con título y fecha */}
-      <div className="bg-gray-800 text-white px-8 py-4 flex items-center justify-between">
+      <div className="bg-gray-800 text-white px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Calendar className="w-5 h-5" />
           <span className="text-sm font-medium">{fechaHora}</span>
@@ -32,27 +32,27 @@ const DashboardHome = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         {/* Título y botones */}
         <div className="mb-6">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel General</h1>
-              <p className="text-gray-600">Resumen rápido del sistema y accesos directos.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Panel General</h1>
+              <p className="text-gray-600 text-sm sm:text-base">Resumen rápido del sistema y accesos directos.</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
               <button
-                className="flex items-center gap-2 bg-gray-300 text-gray-500 px-6 py-2.5 rounded-lg font-medium cursor-not-allowed"
+                className="flex items-center gap-2 bg-gray-300 text-gray-500 px-4 py-2.5 rounded-lg font-medium cursor-not-allowed text-sm"
                 disabled
               >
-                <Vote className="w-5 h-5" />
+                <Vote className="w-4 h-4" />
                 Ver votos
               </button>
               <button
                 onClick={() => navigate('/dashboard/usuarios')}
-                className="flex items-center gap-2 bg-gray-200 text-gray-800 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition"
+                className="flex items-center gap-2 bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition text-sm"
               >
-                <Users className="w-5 h-5" />
+                <Users className="w-4 h-4" />
                 Usuarios
               </button>
             </div>
@@ -60,7 +60,7 @@ const DashboardHome = () => {
         </div>
 
         {/* Tarjetas de estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <StatCard
             title="USUARIOS"
             value="1"
@@ -246,15 +246,15 @@ const DashboardHome = () => {
 
 // Componente de tarjeta de estadística
 const StatCard = ({ title, value, subtitle, icon, bgColor }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 flex items-center justify-between">
-    <div className="flex items-start gap-4">
-      <div className={`${bgColor} text-white p-3 rounded-lg`}>
+  <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 flex items-center justify-between">
+    <div className="flex items-start gap-3 sm:gap-4">
+      <div className={`${bgColor} text-white p-2 sm:p-3 rounded-lg hidden sm:block`}>
         {icon}
       </div>
       <div>
-        <p className="text-xs font-semibold text-gray-600 uppercase mb-1">{title}</p>
-        <h3 className="text-3xl font-bold text-gray-900 mb-1">{value}</h3>
-        <p className="text-sm text-gray-500">{subtitle}</p>
+        <p className="text-[10px] sm:text-xs font-semibold text-gray-600 uppercase mb-1 truncate">{title}</p>
+        <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{value}</h3>
+        <p className="text-xs sm:text-sm text-gray-500">{subtitle}</p>
       </div>
     </div>
   </div>
