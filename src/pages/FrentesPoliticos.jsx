@@ -234,15 +234,7 @@ const FrentesPoliticos = () => {
                             className="h-48 flex items-center justify-center p-6"
                             style={{ backgroundColor: frente.color || '#f3f4f6' }}
                         >
-                            {frente.logo_url ? (
-                                <img
-                                    src={frente.logo_url}
-                                    alt={frente.nombre}
-                                    className="max-h-full max-w-full object-contain"
-                                />
-                            ) : (
-                                <Flag size={64} className="text-white opacity-50" />
-                            )}
+                            <Flag size={64} className="text-white opacity-50" />
                         </div>
 
                         {/* Información */}
@@ -366,26 +358,7 @@ const FrentesPoliticos = () => {
                                     Logo del Frente
                                 </label>
 
-                                {/* Preview de la imagen */}
-                                {previewImagen && (
-                                    <div className="mb-4 relative">
-                                        <img
-                                            src={previewImagen}
-                                            alt="Preview"
-                                            className="max-h-48 mx-auto rounded-lg border-2 border-gray-300"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setPreviewImagen(null);
-                                                setNuevoFrente({ ...nuevoFrente, logo: null });
-                                            }}
-                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-                                )}
+
 
                                 {/* Input de archivo */}
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#E31E24] transition-colors">

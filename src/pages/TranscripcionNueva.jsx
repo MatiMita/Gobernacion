@@ -946,11 +946,9 @@ const Transcripcion = () => {
                                                         <span className="text-xs text-gray-600 ml-2">{imagenActa?.name}</span>
                                                     </div>
                                                 ) : (
-                                                    <img
-                                                        src={previewImagen}
-                                                        alt="Preview"
-                                                        className="w-full h-20 object-contain rounded"
-                                                    />
+                                                    <div className="flex items-center justify-center h-20 bg-gray-100 rounded">
+                                                        <span className="text-xs text-gray-600">{imagenActa?.name}</span>
+                                                    </div>
                                                 )}
                                             </div>
                                         )}

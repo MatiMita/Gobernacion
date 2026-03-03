@@ -74,13 +74,6 @@ const Login = () => {
         <div className="min-h-full flex flex-col justify-center p-6 sm:p-8">
           {/* Cabecera */}
           <div className="flex flex-col items-center mb-6">
-            <div className="bg-white p-3 rounded-2xl shadow-lg mb-4 transform hover:scale-105 transition-transform">
-              <img
-                src="/Logotipo.jpeg"
-                alt="Logo NGP"
-                className="w-24 h-auto object-contain"
-              />
-            </div>
             <h2 className="text-3xl font-extrabold text-white mb-1 tracking-tight">Bienvenido</h2>
             <p className="text-white text-xs text-center opacity-90 max-w-[250px]">
               Sistema de Cómputo Electoral - NGP 2026
@@ -172,8 +165,7 @@ const Login = () => {
       </div>
 
       <div className="hidden md:block flex-1 relative bg-gray-900 h-full overflow-hidden">
-        <img src="/cristo.png" alt="Cristo de la Concordia" className="absolute inset-0 w-full h-full object-cover scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#6495ED] via-black/20 to-transparent mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#6495ED] via-[#3b6fd4] to-[#1a3a8a]"></div>
       </div>
     </div>
   );

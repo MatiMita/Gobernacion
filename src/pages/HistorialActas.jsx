@@ -548,21 +548,7 @@ const HistorialActas = () => {
                                 </div>
                             </div>
 
-                            {/* Imagen del Acta */}
-                            {actaSeleccionada.acta.imagen_url && (
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Imagen del Acta</h3>
-                                    <div className="bg-gray-50 rounded-2xl p-4 border-2 border-gray-200">
-                                        <img
-                                            src={`${API_URL}${actaSeleccionada.acta.imagen_url}`}
-                                            alt="Acta escaneada"
-                                            className="w-full h-auto max-h-96 object-contain rounded-xl cursor-pointer hover:scale-105 transition-transform"
-                                            onClick={() => window.open(`${API_URL}${actaSeleccionada.acta.imagen_url}`, '_blank')}
-                                        />
-                                        <p className="text-xs text-gray-500 text-center mt-2">Click para ver en tamaño completo</p>
-                                    </div>
-                                </div>
-                            )}
+
 
                             {/* Votos por Frente */}
                             <div>
