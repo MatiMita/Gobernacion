@@ -94,19 +94,120 @@ const Transcripcion = () => {
     const [previewImagen, setPreviewImagen] = useState(null);
 
     const API_URL = import.meta.env.VITE_API_URL;
-    const token = localStorage.getItem('token');
 
-    // Cargar distritos al abrir modal
+    // Cargar datos al abrir modal
     useEffect(() => {
         if (showModal) {
-            cargarDistritos();
-            cargarFrentes();
+            inicializarDatos();
         }
     }, [showModal]);
+
+    const inicializarDatos = async () => {
+        // Obtener usuario FRESCO cada vez que se abre el modal
+        let usuario = {};
+        let token = '';
+        
+        try {
+            token = localStorage.getItem('token') || '';
+            const usuarioStr = localStorage.getItem('usuario');
+            if (usuarioStr) {
+                usuario = JSON.parse(usuarioStr);
+            }
+        } catch (error) {
+            console.error('Error al parsear usuario de localStorage:', error);
+            mostrarNotificacion('error', 'Error al cargar datos de usuario');
+            return;
+        }
+        
+        // Siempre cargar frentes
+        await cargarFrentes();
+
+        // Si el usuario tiene mesa asignada, cargar directamente esa mesa
+        if (usuario.id_mesa_asignada) {
+            try {
+                const response = await fetch(`${API_URL}/votos/mesas/${usuario.id_mesa_asignada}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const mesaData = data.data;
+                    
+                    // Pre-cargar todos los datos
+                    setSelectedDistrito({
+                        id_geografico: mesaData.id_geografico,
+                        nombre: mesaData.nombre_geografico
+                    });
+                    setSelectedRecinto({
+                        id_recinto: mesaData.id_recinto,
+                        nombre: mesaData.nombre_recinto
+                    });
+                    setSelectedMesa({
+                        id_mesa: mesaData.id_mesa,
+                        codigo: mesaData.codigo,
+                        numero_mesa: mesaData.numero_mesa
+                    });
+                    
+                    // Saltar directamente al paso de ingreso de votos
+                    setCurrentStep(4);
+                } else {
+                    console.error('Error en respuesta:', data);
+                    mostrarNotificacion('error', data.message || 'Error al cargar mesa asignada');
+                    // Si falla, cargar distritos normalmente
+                    await cargarDistritos();
+                }
+            } catch (error) {
+                console.error('Error al cargar mesa asignada:', error);
+                mostrarNotificacion('error', 'Error al cargar información de mesa asignada: ' + error.message);
+                // Si falla, cargar distritos normalmente
+                await cargarDistritos();
+            }
+        }
+        // Si el usuario tiene recinto asignado (pero no mesa), cargar mesas de ese recinto
+        else if (usuario.id_recinto_asignado) {
+            try {
+                // Cargar información del recinto
+                const recintoResponse = await fetch(`${API_URL}/votos/recintos?id_geografico=all`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const recintoData = await recintoResponse.json();
+                
+                if (recintoData.success) {
+                    const recinto = recintoData.data.find(r => r.id_recinto === usuario.id_recinto_asignado);
+                    
+                    if (recinto) {
+                        setSelectedDistrito({
+                            id_geografico: recinto.id_geografico,
+                            nombre: recinto.nombre_geografico
+                        });
+                        setSelectedRecinto({
+                            id_recinto: recinto.id_recinto,
+                            nombre: recinto.nombre
+                        });
+                        
+                        // Cargar mesas del recinto
+                        await cargarMesas(recinto.id_recinto);
+                        
+                        // Saltar al paso de selección de mesa
+                        setCurrentStep(3);
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar recinto asignado:', error);
+                mostrarNotificacion('error', 'Error al cargar información de recinto asignado');
+            }
+        }
+        // Si no tiene asignaciones, cargar distritos normalmente
+        else {
+            await cargarDistritos();
+        }
+    };
 
     const cargarDistritos = async () => {
         setLoading(prev => ({ ...prev, distritos: true }));
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/geografico`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -138,6 +239,7 @@ const Transcripcion = () => {
     const cargarRecintos = async (idGeografico) => {
         setLoading(prev => ({ ...prev, recintos: true }));
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/votos/recintos?id_geografico=${idGeografico}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -159,6 +261,7 @@ const Transcripcion = () => {
     const cargarMesas = async (idRecinto) => {
         setLoading(prev => ({ ...prev, mesas: true }));
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/votos/mesas?id_recinto=${idRecinto}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -180,6 +283,7 @@ const Transcripcion = () => {
     const cargarFrentes = async () => {
         setLoading(prev => ({ ...prev, frentes: true }));
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/votos/frentes`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -317,10 +421,18 @@ const Transcripcion = () => {
     };
 
     const resetForm = () => {
-        setCurrentStep(1);
-        setSelectedDistrito(null);
-        setSelectedRecinto(null);
-        setSelectedMesa(null);
+        // Obtener usuario fresco de localStorage
+        let usuario = {};
+        try {
+            const usuarioStr = localStorage.getItem('usuario');
+            if (usuarioStr) {
+                usuario = JSON.parse(usuarioStr);
+            }
+        } catch (error) {
+            console.error('Error al parsear usuario:', error);
+        }
+        
+        // Limpiar votos
         setVotosNulos(0);
         setVotosBlancos(0);
         setObservaciones('');
@@ -338,12 +450,31 @@ const Transcripcion = () => {
             setVotosAsambleistaT(votosIniciales);
             setVotosAsambleistaP(votosIniciales);
         }
+
+        // Mantener selecciones según asignaciones del usuario
+        if (usuario.id_mesa_asignada) {
+            // Si tiene mesa asignada, mantener todo y volver al paso 4
+            setCurrentStep(4);
+        } else if (usuario.id_recinto_asignado) {
+            // Si tiene recinto asignado, limpiar solo mesa y volver al paso 3
+            setSelectedMesa(null);
+            setCurrentStep(3);
+        } else {
+            // Si no tiene asignaciones, limpiar todo y volver al paso 1
+            setCurrentStep(1);
+            setSelectedDistrito(null);
+            setSelectedRecinto(null);
+            setSelectedMesa(null);
+        }
     };
 
     const totalVotosGobernador = votosGobernador.reduce((sum, v) => sum + v.cantidad, 0);
     const totalVotosAsambleistaT = votosAsambleistaT.reduce((sum, v) => sum + v.cantidad, 0);
     const totalVotosAsambleistaP = votosAsambleistaP.reduce((sum, v) => sum + v.cantidad, 0);
     const totalGeneral = totalVotosGobernador + totalVotosAsambleistaT + totalVotosAsambleistaP + votosNulos + votosBlancos;
+
+    // Verificar si el usuario tiene mesa asignada (modal simplificado)
+    const tieneMesaAsignada = selectedMesa?.id_mesa && currentStep === 4;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -424,53 +555,91 @@ const Transcripcion = () => {
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl my-8">
                         
-                        {/* Header del Modal */}
-                        <div className="sticky top-0 bg-gradient-to-r from-[#1E3A8A] to-[#152a63] text-white z-10 px-6 py-4 rounded-t-xl">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-bold">Registro de Acta Electoral</h2>
-                                <button
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        resetForm();
-                                    }}
-                                    className="p-2 hover:bg-white/10 rounded-lg transition"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            
-                            {/* Stepper */}
-                            <div className="flex items-center">
-                                {[
-                                    { num: 1, label: 'Distrito', icon: MapPin },
-                                    { num: 2, label: 'Recinto', icon: Building2 },
-                                    { num: 3, label: 'Mesa', icon: Grid3x3 },
-                                    { num: 4, label: 'Votos', icon: Vote }
-                                ].map((step, idx) => (
-                                    <React.Fragment key={step.num}>
-                                        <div className="flex items-center">
-                                            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                                                currentStep >= step.num 
-                                                    ? 'bg-[#F59E0B] text-white' 
-                                                    : 'bg-white/20 text-white'
-                                            }`}>
-                                                {currentStep > step.num ? <CheckCircle className="w-4 h-4" /> : step.num}
+                        {/* Header del Modal - Versión simplificada para mesa asignada */}
+                        {tieneMesaAsignada ? (
+                            <div className="sticky top-0 bg-gradient-to-r from-[#1E3A8A] to-[#152a63] text-white z-10 px-6 py-4 rounded-t-xl">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                        <h2 className="text-lg font-bold mb-3">Registro de Acta Electoral</h2>
+                                        
+                                        {/* Información de la mesa asignada */}
+                                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                                <div>
+                                                    <p className="text-white/70 text-xs mb-1">Distrito</p>
+                                                    <p className="font-semibold">{selectedDistrito?.nombre}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-white/70 text-xs mb-1">Recinto</p>
+                                                    <p className="font-semibold">{selectedRecinto?.nombre}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-white/70 text-xs mb-1">Mesa</p>
+                                                    <p className="font-semibold">{selectedMesa?.codigo}</p>
+                                                </div>
                                             </div>
-                                            <span className={`ml-2 text-sm font-medium ${
-                                                currentStep >= step.num ? 'text-white' : 'text-white/60'
-                                            }`}>
-                                                {step.label}
-                                            </span>
                                         </div>
-                                        {idx < 3 && (
-                                            <div className={`w-12 h-0.5 mx-3 ${
-                                                currentStep > step.num ? 'bg-[#F59E0B]' : 'bg-white/20'
-                                            }`} />
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setShowModal(false);
+                                            resetForm();
+                                        }}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition ml-4"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            /* Header del Modal - Versión con stepper para usuarios sin mesa asignada */
+                            <div className="sticky top-0 bg-gradient-to-r from-[#1E3A8A] to-[#152a63] text-white z-10 px-6 py-4 rounded-t-xl">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-bold">Registro de Acta Electoral</h2>
+                                    <button
+                                        onClick={() => {
+                                            setShowModal(false);
+                                            resetForm();
+                                        }}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                
+                                {/* Stepper */}
+                                <div className="flex items-center">
+                                    {[
+                                        { num: 1, label: 'Distrito', icon: MapPin },
+                                        { num: 2, label: 'Recinto', icon: Building2 },
+                                        { num: 3, label: 'Mesa', icon: Grid3x3 },
+                                        { num: 4, label: 'Votos', icon: Vote }
+                                    ].map((step, idx) => (
+                                        <React.Fragment key={step.num}>
+                                            <div className="flex items-center">
+                                                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
+                                                    currentStep >= step.num 
+                                                        ? 'bg-[#F59E0B] text-white' 
+                                                        : 'bg-white/20 text-white'
+                                                }`}>
+                                                    {currentStep > step.num ? <CheckCircle className="w-4 h-4" /> : step.num}
+                                                </div>
+                                                <span className={`ml-2 text-sm font-medium ${
+                                                    currentStep >= step.num ? 'text-white' : 'text-white/60'
+                                                }`}>
+                                                    {step.label}
+                                                </span>
+                                            </div>
+                                            {idx < 3 && (
+                                                <div className={`w-12 h-0.5 mx-3 ${
+                                                    currentStep > step.num ? 'bg-[#F59E0B]' : 'bg-white/20'
+                                                }`} />
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Contenido del Modal */}
                         <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">

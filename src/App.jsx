@@ -7,6 +7,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 // Páginas
 import Login from './pages/Login';
 import DashboardHome from './pages/DashboardHome';
+import DashboardRecinto from './pages/DashboardRecinto';
 import Transcripcion from './pages/TranscripcionNueva';
 import GestionUsuarios from './pages/GestionUsuarios';
 import Geografia from './pages/Geografia';
@@ -14,6 +15,19 @@ import FrentesPoliticos from './pages/FrentesPoliticos';
 import Mesas from './pages/Mesas';
 import ResultadosEnVivo from './pages/ResultadosEnVivo';
 import HistorialActas from './pages/HistorialActas';
+
+// Componente para redirigir según rol
+const DashboardIndex = () => {
+  const user = JSON.parse(localStorage.getItem('usuario')) || {};
+  
+  // Si es Jefe de Recinto o Delegado de Mesa, mostrar su dashboard específico
+  if (user.rol === 'Jefe de Recinto' || user.rol === 'Delegado de Mesa') {
+    return <DashboardRecinto />;
+  }
+  
+  // Para otros roles, mostrar dashboard general
+  return <DashboardHome />;
+};
 
 function App() {
   return (
@@ -27,7 +41,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
 
 
-          <Route index element={<DashboardHome />} />
+          <Route index element={<DashboardIndex />} />
 
 
           <Route path="transcripcion" element={<Transcripcion />} />

@@ -33,10 +33,16 @@ router.get('/', async (req, res) => {
         u.nombre_usuario,
         u.fecha_fin,
         u.id_rol,
+        u.id_recinto_asignado,
+        u.id_mesa_asignada,
         r.nombre as rol_nombre,
-        r.descripcion as rol_descripcion
+        r.descripcion as rol_descripcion,
+        rec.nombre as recinto_nombre,
+        m.codigo as mesa_codigo
       FROM usuario u
       LEFT JOIN rol r ON u.id_rol = r.id_rol
+      LEFT JOIN recinto rec ON u.id_recinto_asignado = rec.id_recinto
+      LEFT JOIN mesa m ON u.id_mesa_asignada = m.id_mesa
       ORDER BY u.id_usuario DESC
     `);
 
@@ -47,7 +53,11 @@ router.get('/', async (req, res) => {
       activo: !u.fecha_fin || new Date(u.fecha_fin) > new Date(),
       rol: u.rol_nombre
         ? { nombre: u.rol_nombre, descripcion: u.rol_descripcion }
-        : null
+        : null,
+      id_recinto_asignado: u.id_recinto_asignado,
+      recinto_nombre: u.recinto_nombre,
+      id_mesa_asignada: u.id_mesa_asignada,
+      mesa_codigo: u.mesa_codigo
     }));
 
     res.json({ success: true, data: usuarios });
@@ -61,11 +71,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/usuarios - Crear nuevo usuario (solo nombre_usuario, contrasena, id_rol)
+// POST /api/usuarios - Crear nuevo usuario
 router.post('/', async (req, res) => {
-  let { nombre_usuario, contrasena, id_rol } = req.body;
+  let { nombre_usuario, contrasena, id_rol, id_recinto_asignado, id_mesa_asignada } = req.body;
 
   id_rol = parseInt(id_rol, 10);
+  id_recinto_asignado = id_recinto_asignado ? parseInt(id_recinto_asignado, 10) : null;
+  id_mesa_asignada = id_mesa_asignada ? parseInt(id_mesa_asignada, 10) : null;
 
   try {
     if (!nombre_usuario || !contrasena) {
@@ -101,11 +113,11 @@ router.post('/', async (req, res) => {
     // Crear usuario
     const usuarioResult = await pool.query(
       `
-      INSERT INTO usuario (nombre_usuario, contrasena, id_rol)
-      VALUES ($1, $2, $3)
-      RETURNING id_usuario, nombre_usuario, id_rol, fecha_fin
+      INSERT INTO usuario (nombre_usuario, contrasena, id_rol, id_recinto_asignado, id_mesa_asignada)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id_usuario, nombre_usuario, id_rol, fecha_fin, id_recinto_asignado, id_mesa_asignada
       `,
-      [nombre_usuario, hashedPassword, id_rol]
+      [nombre_usuario, hashedPassword, id_rol, id_recinto_asignado, id_mesa_asignada]
     );
 
     // Traer rol para devolverlo bonito
@@ -145,6 +157,8 @@ router.get('/:id', async (req, res) => {
         u.nombre_usuario,
         u.fecha_fin,
         u.id_rol,
+        u.id_recinto_asignado,
+        u.id_mesa_asignada,
         r.nombre as rol_nombre,
         r.descripcion as rol_descripcion
       FROM usuario u
@@ -167,7 +181,9 @@ router.get('/:id', async (req, res) => {
         nombre_usuario: u.nombre_usuario,
         id_rol: u.id_rol,
         activo: !u.fecha_fin || new Date(u.fecha_fin) > new Date(),
-        rol: u.rol_nombre ? { nombre: u.rol_nombre, descripcion: u.rol_descripcion } : null
+        rol: u.rol_nombre ? { nombre: u.rol_nombre, descripcion: u.rol_descripcion } : null,
+        id_recinto_asignado: u.id_recinto_asignado,
+        id_mesa_asignada: u.id_mesa_asignada
       }
     });
   } catch (error) {
@@ -180,12 +196,14 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/usuarios/:id - Actualizar usuario (nombre_usuario, id_rol y opcional contrasena)
+// PUT /api/usuarios/:id - Actualizar usuario
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  let { nombre_usuario, contrasena, id_rol } = req.body;
+  let { nombre_usuario, contrasena, id_rol, id_recinto_asignado, id_mesa_asignada } = req.body;
 
   id_rol = parseInt(id_rol, 10);
+  id_recinto_asignado = id_recinto_asignado ? parseInt(id_recinto_asignado, 10) : null;
+  id_mesa_asignada = id_mesa_asignada ? parseInt(id_mesa_asignada, 10) : null;
 
   try {
     if (!nombre_usuario) {
@@ -226,16 +244,18 @@ router.put('/:id', async (req, res) => {
     let updateQuery = `
       UPDATE usuario
       SET nombre_usuario = $1,
-          id_rol = $2
+          id_rol = $2,
+          id_recinto_asignado = $3,
+          id_mesa_asignada = $4
     `;
-    const params = [nombre_usuario, id_rol];
+    const params = [nombre_usuario, id_rol, id_recinto_asignado, id_mesa_asignada];
 
     if (contrasena && contrasena.trim() !== '') {
       const hashedPassword = await bcrypt.hash(contrasena, 10);
-      updateQuery += `, contrasena = $3 WHERE id_usuario = $4 RETURNING id_usuario, nombre_usuario, id_rol, fecha_fin`;
+      updateQuery += `, contrasena = $5 WHERE id_usuario = $6 RETURNING id_usuario, nombre_usuario, id_rol, fecha_fin, id_recinto_asignado, id_mesa_asignada`;
       params.push(hashedPassword, id);
     } else {
-      updateQuery += ` WHERE id_usuario = $3 RETURNING id_usuario, nombre_usuario, id_rol, fecha_fin`;
+      updateQuery += ` WHERE id_usuario = $5 RETURNING id_usuario, nombre_usuario, id_rol, fecha_fin, id_recinto_asignado, id_mesa_asignada`;
       params.push(id);
     }
 

@@ -16,42 +16,42 @@ export const MENU_ITEMS = [
       label: 'Dashboard General', 
       icon: LayoutDashboard, 
       path: '/dashboard',
-      roles: ['Administrador', 'Supervisor'] 
+      roles: ['Administrador del Sistema', 'Administrador', 'Supervisor'] 
     },
     { 
       id: 'usuarios', 
       label: 'Usuarios y Roles', 
       icon: Users, 
       path: '/dashboard/usuarios',
-      roles: ['Administrador'] 
+      roles: ['Administrador del Sistema', 'Administrador'] 
     },
     { 
       id: 'geografia', 
       label: 'Parámetros Geográficos', 
       icon: Map, 
       path: '/dashboard/geografia',
-      roles: ['Administrador'] 
+      roles: ['Administrador del Sistema', 'Administrador'] 
     },
     { 
       id: 'mesas', 
       label: 'Recintos y Mesas', 
       icon: Grid3x3, 
       path: '/dashboard/mesas',
-      roles: ['Administrador'] 
+      roles: ['Administrador del Sistema', 'Administrador'] 
     },
     { 
       id: 'partidos', 
       label: 'Frentes Políticos', 
       icon: Flag, 
       path: '/dashboard/partidos',
-      roles: ['Administrador'] 
+      roles: ['Administrador del Sistema', 'Administrador'] 
     },
     { 
       id: 'resultados', 
       label: 'Resultados en Vivo', 
       icon: BarChart3, 
       path: '/dashboard/resultados',
-      roles: ['Administrador', 'Supervisor'] 
+      roles: ['Administrador del Sistema', 'Administrador', 'Supervisor', 'Jefe de Recinto', 'Delegado de Mesa'] 
     },
     
     { 
@@ -59,13 +59,13 @@ export const MENU_ITEMS = [
       label: 'Digitalización de Actas', 
       icon: FileText, 
       path: '/dashboard/transcripcion',
-      roles: ['Administrador', 'Operador', 'Supervisor'] 
+      roles: ['Administrador del Sistema', 'Administrador', 'Operador', 'Supervisor', 'Jefe de Recinto', 'Delegado de Mesa'] 
     },
     { 
       id: 'historial', 
       label: 'Historial de Actas', 
       icon: History, 
       path: '/dashboard/historial',
-      roles: ['Administrador', 'Operador', 'Supervisor'] 
+      roles: ['Administrador del Sistema', 'Administrador', 'Operador', 'Supervisor', 'Jefe de Recinto', 'Delegado de Mesa'] 
     }
 ];

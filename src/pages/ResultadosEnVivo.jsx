@@ -48,16 +48,16 @@ const ResultadosEnVivo = () => {
             setLoading(true);
             setError(null);
             
-            console.log('Cargando resultados desde:', `${API_URL}/votos/resultados-vivo`);
-            
-            const response = await fetch(`${API_URL}/votos/resultados-vivo`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/votos/resultados-vivo`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
             
             const data = await response.json();
-            console.log('Datos recibidos:', data);
 
             if (data.success && data.data) {
                 // Asegurar que resultados sea un array

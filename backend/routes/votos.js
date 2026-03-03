@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from '../database.js';
-import { verificarToken } from '../middleware/auth.js';
+import { verificarToken, obtenerFiltrosUsuario, verificarPermisoMesa } from '../middleware/auth.js';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -36,10 +36,13 @@ const uploadActa = multer({
     }
 });
 
-// GET /api/votos - Obtener todos los registros de votos
-router.get('/', async (req, res) => {
+// GET /api/votos - Obtener todos los registros de votos (con filtros según rol)
+router.get('/', verificarToken, async (req, res) => {
     try {
-        const result = await pool.query(`
+        // Obtener filtros según el rol del usuario
+        const filtros = obtenerFiltrosUsuario(req.usuario);
+        
+        let query = `
             SELECT 
                 a.id_acta,
                 a.fecha_registro,
@@ -62,8 +65,16 @@ router.get('/', async (req, res) => {
             LEFT JOIN geografico g ON r.id_geografico = g.id_geografico
             LEFT JOIN usuario u ON a.id_usuario = u.id_usuario
             LEFT JOIN tipo_eleccion te ON a.id_tipo_eleccion = te.id_tipo_eleccion
-            ORDER BY a.fecha_registro DESC
-        `);
+        `;
+
+        // Agregar filtros WHERE si hay restricciones por rol
+        if (filtros.donde.length > 0) {
+            query += ' WHERE ' + filtros.donde.join(' AND ');
+        }
+
+        query += ' ORDER BY a.fecha_registro DESC';
+
+        const result = await pool.query(query, filtros.parametros);
 
         res.json({
             success: true,
@@ -81,7 +92,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/votos/recintos - Obtener recintos por geografico
-router.get('/recintos', async (req, res) => {
+router.get('/recintos', verificarToken, async (req, res) => {
     const { id_geografico } = req.query;
 
     try {
@@ -225,11 +236,14 @@ router.delete('/recintos/:id', async (req, res) => {
     }
 });
 
-// GET /api/votos/mesas - Obtener mesas por recinto
-router.get('/mesas', async (req, res) => {
+// GET /api/votos/mesas - Obtener mesas (con filtros según rol)
+router.get('/mesas', verificarToken, async (req, res) => {
     const { id_recinto } = req.query;
 
     try {
+        // Obtener filtros según el rol del usuario
+        const filtros = obtenerFiltrosUsuario(req.usuario);
+        
         let query = `
             SELECT 
                 m.id_mesa,
@@ -245,9 +259,27 @@ router.get('/mesas', async (req, res) => {
         `;
 
         const params = [];
+        const whereConditions = [];
+
+        // Agregar filtro por recinto de la query si se proporciona
         if (id_recinto) {
-            query += ` WHERE m.id_recinto = $1`;
+            whereConditions.push(`m.id_recinto = $${params.length + 1}`);
             params.push(id_recinto);
+        }
+
+        // Agregar filtros de rol
+        if (filtros.donde.length > 0) {
+            // Ajustar índices de parámetros
+            filtros.donde.forEach((condicion, idx) => {
+                const nuevoIndice = params.length + 1;
+                whereConditions.push(condicion.replace(`$${idx + 1}`, `$${nuevoIndice}`));
+            });
+            params.push(...filtros.parametros);
+        }
+
+        // Agregar WHERE si hay condiciones
+        if (whereConditions.length > 0) {
+            query += ' WHERE ' + whereConditions.join(' AND ');
         }
 
         query += ` GROUP BY m.id_mesa, m.codigo, m.descripcion, m.numero_mesa, m.id_recinto, r.nombre ORDER BY m.numero_mesa`;
@@ -264,6 +296,54 @@ router.get('/mesas', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al obtener mesas',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/votos/mesas/:id - Obtener información completa de una mesa específica
+router.get('/mesas/:id', verificarToken, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = `
+            SELECT 
+                m.id_mesa,
+                m.codigo,
+                m.descripcion,
+                m.numero_mesa,
+                m.id_recinto,
+                r.nombre as nombre_recinto,
+                r.id_geografico,
+                g.nombre as nombre_geografico,
+                COUNT(a.id_acta) as actas_registradas
+            FROM mesa m
+            LEFT JOIN recinto r ON m.id_recinto = r.id_recinto
+            LEFT JOIN geografico g ON r.id_geografico = g.id_geografico
+            LEFT JOIN acta a ON m.id_mesa = a.id_mesa
+            WHERE m.id_mesa = $1
+            GROUP BY m.id_mesa, m.codigo, m.descripcion, m.numero_mesa, m.id_recinto, r.nombre, r.id_geografico, g.nombre
+        `;
+
+        const result = await pool.query(query, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Mesa no encontrada'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Error al obtener mesa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener información de la mesa',
             error: error.message
         });
     }
@@ -398,7 +478,7 @@ router.delete('/mesas/:id', async (req, res) => {
 });
 
 // GET /api/votos/frentes - Obtener todos los frentes políticos
-router.get('/frentes', async (req, res) => {
+router.get('/frentes', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT 
@@ -459,12 +539,45 @@ router.post('/registrar-acta', verificarToken, uploadActa.single('imagen_acta'),
     const client = await pool.connect();
 
     try {
-        await client.query('BEGIN');
-
-        // Validaciones
+        // Validaciones básicas
         if (!id_mesa) {
             throw new Error('El ID de mesa es requerido');
         }
+
+        // Verificar permisos según rol
+        const usuario = req.usuario;
+        
+        // Delegado de Mesa: solo puede registrar actas de su mesa asignada
+        if (usuario.rol === 'Delegado de Mesa') {
+            if (!usuario.id_mesa_asignada) {
+                throw new Error('No tienes una mesa asignada');
+            }
+            if (parseInt(id_mesa) !== usuario.id_mesa_asignada) {
+                throw new Error('No tienes permisos para registrar actas en esta mesa');
+            }
+        }
+        
+        // Jefe de Recinto: solo puede registrar actas en mesas de su recinto
+        if (usuario.rol === 'Jefe de Recinto') {
+            if (!usuario.id_recinto_asignado) {
+                throw new Error('No tienes un recinto asignado');
+            }
+            
+            const mesaResult = await client.query(
+                'SELECT id_recinto FROM mesa WHERE id_mesa = $1',
+                [id_mesa]
+            );
+            
+            if (mesaResult.rows.length === 0) {
+                throw new Error('Mesa no encontrada');
+            }
+            
+            if (mesaResult.rows[0].id_recinto !== usuario.id_recinto_asignado) {
+                throw new Error('Esta mesa no pertenece a tu recinto asignado');
+            }
+        }
+        
+        await client.query('BEGIN');
 
         // Calcular totales - Sumamos todos los votos de todos los cargos
         const votosValidosGobernador = votos_gobernador?.reduce((sum, v) => sum + (v.cantidad || 0), 0) || 0;
@@ -688,7 +801,7 @@ router.put('/acta/:id', verificarToken, async (req, res) => {
 });
 
 // GET /api/votos/acta/:id - Obtener detalle de un acta
-router.get('/acta/:id', async (req, res) => {
+router.get('/acta/:id', verificarToken, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -753,7 +866,7 @@ router.get('/acta/:id', async (req, res) => {
 });
 
 // GET /api/votos/resultados-vivo - Obtener resultados en tiempo real
-router.get('/resultados-vivo', async (req, res) => {
+router.get('/resultados-vivo', verificarToken, async (req, res) => {
     try {
         // Obtener votos agregados por frente político y tipo de cargo
         const resultadosQuery = await pool.query(`
@@ -831,6 +944,83 @@ router.get('/resultados-vivo', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al obtener resultados',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/votos/mesas-detalle - Obtener votos agrupados por mesa (para Jefe de Recinto)
+router.get('/mesas-detalle', verificarToken, async (req, res) => {
+    try {
+        // Obtener filtros según el rol del usuario
+        const filtros = obtenerFiltrosUsuario(req.usuario);
+        
+        let query = `
+            SELECT 
+                m.id_mesa,
+                m.codigo as codigo_mesa,
+                m.numero_mesa,
+                m.descripcion as descripcion_mesa,
+                r.nombre as nombre_recinto,
+                COUNT(DISTINCT a.id_acta) as total_actas,
+                COALESCE(SUM(a.votos_totales), 0) as total_votos,
+                COALESCE(SUM(a.votos_nulos), 0) as votos_nulos,
+                COALESCE(SUM(a.votos_blancos), 0) as votos_blancos,
+                CASE 
+                    WHEN COUNT(a.id_acta) > 0 THEN 'Registrada'
+                    ELSE 'Pendiente'
+                END as estado,
+                MAX(a.fecha_registro) as ultima_actualizacion
+            FROM mesa m
+            LEFT JOIN recinto r ON m.id_recinto = r.id_recinto
+            LEFT JOIN acta a ON m.id_mesa = a.id_mesa
+        `;
+
+        // Agregar filtros WHERE si hay restricciones por rol
+        if (filtros.donde.length > 0) {
+            query += ' WHERE ' + filtros.donde.join(' AND ');
+        }
+
+        query += `
+            GROUP BY m.id_mesa, m.codigo, m.numero_mesa, m.descripcion, r.nombre
+            ORDER BY m.numero_mesa
+        `;
+
+        const result = await pool.query(query, filtros.parametros);
+
+        // Para cada mesa, obtener el detalle de votos por frente
+        const mesasConDetalle = await Promise.all(result.rows.map(async (mesa) => {
+            const votosQuery = await pool.query(`
+                SELECT 
+                    f.nombre as frente_nombre,
+                    f.siglas as frente_siglas,
+                    f.color as frente_color,
+                    v.tipo_cargo,
+                    COALESCE(SUM(v.cantidad), 0) as total_votos
+                FROM voto v
+                INNER JOIN acta a ON v.id_acta = a.id_acta
+                INNER JOIN frente_politico f ON v.id_frente = f.id_frente
+                WHERE a.id_mesa = $1
+                GROUP BY f.id_frente, f.nombre, f.siglas, f.color, v.tipo_cargo
+                ORDER BY total_votos DESC
+            `, [mesa.id_mesa]);
+
+            return {
+                ...mesa,
+                votos_por_frente: votosQuery.rows
+            };
+        }));
+
+        res.json({
+            success: true,
+            data: mesasConDetalle
+        });
+
+    } catch (error) {
+        console.error('Error al obtener detalle de mesas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener detalle de mesas',
             error: error.message
         });
     }

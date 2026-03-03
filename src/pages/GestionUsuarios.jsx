@@ -4,6 +4,8 @@ import { Edit, Trash2, Plus, UserCircle, X, Shield, Key, Mail, CheckCircle, XCir
 const GestionUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [recintos, setRecintos] = useState([]);
+  const [mesas, setMesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -14,7 +16,9 @@ const GestionUsuarios = () => {
   const [nuevoUsuario, setNuevoUsuario] = useState({
     nombre_usuario: '',
     contrasena: '',
-    id_rol: ''
+    id_rol: '',
+    id_recinto_asignado: '',
+    id_mesa_asignada: ''
   });
 
   const cargarUsuarios = async () => {
@@ -64,9 +68,51 @@ const GestionUsuarios = () => {
     }
   };
 
+  const cargarRecintos = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`${API_URL}/votos/recintos`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) setRecintos(data.data);
+    } catch (err) {
+      console.error('Error al cargar recintos:', err);
+    }
+  };
+
+  const cargarMesas = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`${API_URL}/votos/mesas`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) setMesas(data.data);
+    } catch (err) {
+      console.error('Error al cargar mesas:', err);
+    }
+  };
+
   useEffect(() => {
     cargarUsuarios();
     cargarRoles();
+    cargarRecintos();
+    cargarMesas();
   }, []);
 
   const abrirModal = (usuario = null) => {
@@ -77,7 +123,9 @@ const GestionUsuarios = () => {
       setNuevoUsuario({
         nombre_usuario: usuario.nombre_usuario || '',
         contrasena: '',
-        id_rol: usuario.id_rol ? String(usuario.id_rol) : ''
+        id_rol: usuario.id_rol ? String(usuario.id_rol) : '',
+        id_recinto_asignado: usuario.id_recinto_asignado ? String(usuario.id_recinto_asignado) : '',
+        id_mesa_asignada: usuario.id_mesa_asignada ? String(usuario.id_mesa_asignada) : ''
       });
     } else {
       setModoEdicion(false);
@@ -86,7 +134,9 @@ const GestionUsuarios = () => {
       setNuevoUsuario({
         nombre_usuario: '',
         contrasena: '',
-        id_rol: ''
+        id_rol: '',
+        id_recinto_asignado: '',
+        id_mesa_asignada: ''
       });
     }
 
@@ -102,7 +152,9 @@ const GestionUsuarios = () => {
     setNuevoUsuario({
       nombre_usuario: '',
       contrasena: '',
-      id_rol: ''
+      id_rol: '',
+      id_recinto_asignado: '',
+      id_mesa_asignada: ''
     });
   };
 
@@ -119,6 +171,14 @@ const GestionUsuarios = () => {
     // Solo enviar contrasena si: creando o si escribió algo en edición
     if (!modoEdicion || (nuevoUsuario.contrasena && nuevoUsuario.contrasena.trim() !== '')) {
       datosParaEnviar.contrasena = nuevoUsuario.contrasena;
+    }
+
+    // Agregar asignaciones si se proporcionaron
+    if (nuevoUsuario.id_recinto_asignado) {
+      datosParaEnviar.id_recinto_asignado = parseInt(nuevoUsuario.id_recinto_asignado, 10);
+    }
+    if (nuevoUsuario.id_mesa_asignada) {
+      datosParaEnviar.id_mesa_asignada = parseInt(nuevoUsuario.id_mesa_asignada, 10);
     }
 
     try {
@@ -271,11 +331,19 @@ const GestionUsuarios = () => {
                     {/* Rol */}
                     <td className="px-6 py-4">
                       {u.rol?.nombre ? (
-                        <div className="flex items-center gap-2">
-                          <Shield size={14} className="text-[#F59E0B]" />
-                          <span className="bg-[#F59E0B] bg-opacity-10 text-[#F59E0B] text-xs px-3 py-1.5 rounded-lg font-bold border border-[#F59E0B] border-opacity-30">
-                            {u.rol.nombre}
-                          </span>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <Shield size={14} className="text-[#F59E0B]" />
+                            <span className="bg-[#F59E0B] bg-opacity-10 text-[#F59E0B] text-xs px-3 py-1.5 rounded-lg font-bold border border-[#F59E0B] border-opacity-30">
+                              {u.rol.nombre}
+                            </span>
+                          </div>
+                          {u.recinto_nombre && (
+                            <span className="text-xs text-gray-500 ml-6">📍 {u.recinto_nombre}</span>
+                          )}
+                          {u.mesa_codigo && (
+                            <span className="text-xs text-gray-500 ml-6">🗳️ Mesa {u.mesa_codigo}</span>
+                          )}
                         </div>
                       ) : (
                         <span className="text-gray-400 text-xs">Sin Rol</span>
@@ -440,6 +508,52 @@ const GestionUsuarios = () => {
                       ))}
                     </select>
                   </div>
+
+                  {/* Campo de Recinto - Solo para Jefe de Recinto */}
+                  {nuevoUsuario.id_rol && roles.find(r => r.id_rol === parseInt(nuevoUsuario.id_rol))?.nombre === 'Jefe de Recinto' && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Recinto Asignado <span className="text-[#F59E0B]">*</span>
+                      </label>
+                      <select
+                        name="id_recinto_asignado"
+                        value={nuevoUsuario.id_recinto_asignado}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#1E3A8A] focus:outline-none appearance-none"
+                      >
+                        <option value="">Seleccione un recinto</option>
+                        {recintos.map((recinto) => (
+                          <option key={recinto.id_recinto} value={recinto.id_recinto}>
+                            {recinto.nombre} ({recinto.cantidad_mesas} mesas)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Campo de Mesa - Solo para Delegado de Mesa */}
+                  {nuevoUsuario.id_rol && roles.find(r => r.id_rol === parseInt(nuevoUsuario.id_rol))?.nombre === 'Delegado de Mesa' && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Mesa Asignada <span className="text-[#F59E0B]">*</span>
+                      </label>
+                      <select
+                        name="id_mesa_asignada"
+                        value={nuevoUsuario.id_mesa_asignada}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#1E3A8A] focus:outline-none appearance-none"
+                      >
+                        <option value="">Seleccione una mesa</option>
+                        {mesas.map((mesa) => (
+                          <option key={mesa.id_mesa} value={mesa.id_mesa}>
+                            {mesa.codigo} - {mesa.nombre_recinto || 'Sin recinto'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 

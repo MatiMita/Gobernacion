@@ -59,6 +59,30 @@ const Sidebar = () => {
             </div>
           </div>
         </div>
+        
+        {/* Mostrar asignación de Recinto o Mesa */}
+        {(user.rol === 'Jefe de Recinto' || user.rol === 'Delegado de Mesa') && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            {user.rol === 'Jefe de Recinto' && user.recinto_nombre && (
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 text-lg">📍</span>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-blue-900 uppercase tracking-wide">Recinto Asignado</p>
+                  <p className="text-sm font-semibold text-blue-700 mt-0.5">{user.recinto_nombre}</p>
+                </div>
+              </div>
+            )}
+            {user.rol === 'Delegado de Mesa' && user.mesa_codigo && (
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 text-lg">🗳️</span>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-blue-900 uppercase tracking-wide">Mesa Asignada</p>
+                  <p className="text-sm font-semibold text-blue-700 mt-0.5">{user.mesa_codigo}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Navegacion Principal con diseño mejorado */}

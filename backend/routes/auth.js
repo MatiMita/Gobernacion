@@ -18,10 +18,16 @@ router.post('/login', async (req, res) => {
         u.contrasena,
         u.id_rol,
         u.fecha_fin,
+        u.id_recinto_asignado,
+        u.id_mesa_asignada,
         r.nombre as rol_nombre,
-        r.descripcion as rol_descripcion
+        r.descripcion as rol_descripcion,
+        rec.nombre as recinto_nombre,
+        m.codigo as mesa_codigo
       FROM usuario u
       LEFT JOIN rol r ON u.id_rol = r.id_rol
+      LEFT JOIN recinto rec ON u.id_recinto_asignado = rec.id_recinto
+      LEFT JOIN mesa m ON u.id_mesa_asignada = m.id_mesa
       WHERE u.nombre_usuario = $1
       `,
       [nombre_usuario]
@@ -47,7 +53,9 @@ router.post('/login', async (req, res) => {
       {
         id: usuario.id_usuario,
         nombre_usuario: usuario.nombre_usuario,
-        rol: usuario.rol_nombre || null
+        rol: usuario.rol_nombre || null,
+        id_recinto_asignado: usuario.id_recinto_asignado || null,
+        id_mesa_asignada: usuario.id_mesa_asignada || null
       },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
@@ -62,7 +70,11 @@ router.post('/login', async (req, res) => {
           nombre_usuario: usuario.nombre_usuario,
           id_rol: usuario.id_rol,
           rol: usuario.rol_nombre || null,
-          rol_descripcion: usuario.rol_descripcion || null
+          rol_descripcion: usuario.rol_descripcion || null,
+          id_recinto_asignado: usuario.id_recinto_asignado || null,
+          id_mesa_asignada: usuario.id_mesa_asignada || null,
+          recinto_nombre: usuario.recinto_nombre || null,
+          mesa_codigo: usuario.mesa_codigo || null
         }
       }
     });
@@ -93,10 +105,16 @@ router.get('/me', async (req, res) => {
         u.nombre_usuario,
         u.id_rol,
         u.fecha_fin,
+        u.id_recinto_asignado,
+        u.id_mesa_asignada,
         r.nombre as rol_nombre,
-        r.descripcion as rol_descripcion
+        r.descripcion as rol_descripcion,
+        rec.nombre as recinto_nombre,
+        m.codigo as mesa_codigo
       FROM usuario u
       LEFT JOIN rol r ON u.id_rol = r.id_rol
+      LEFT JOIN recinto rec ON u.id_recinto_asignado = rec.id_recinto
+      LEFT JOIN mesa m ON u.id_mesa_asignada = m.id_mesa
       WHERE u.id_usuario = $1
       `,
       [decoded.id]
@@ -116,6 +134,10 @@ router.get('/me', async (req, res) => {
         id_rol: usuario.id_rol,
         rol: usuario.rol_nombre || null,
         rol_descripcion: usuario.rol_descripcion || null,
+        id_recinto_asignado: usuario.id_recinto_asignado || null,
+        id_mesa_asignada: usuario.id_mesa_asignada || null,
+        recinto_nombre: usuario.recinto_nombre || null,
+        mesa_codigo: usuario.mesa_codigo || null,
         activo: !usuario.fecha_fin || new Date(usuario.fecha_fin) > new Date()
       }
     });

@@ -44,7 +44,10 @@ const HistorialActas = () => {
     const cargarActas = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_URL}/votos`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/votos`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await response.json();
             
             if (data.success) {
@@ -59,7 +62,10 @@ const HistorialActas = () => {
 
     const cargarDetalleActa = async (id) => {
         try {
-            const response = await fetch(`${API_URL}/votos/acta/${id}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/votos/acta/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await response.json();
             
             if (data.success) {
@@ -73,7 +79,10 @@ const HistorialActas = () => {
 
     const cargarFrentes = async () => {
         try {
-            const response = await fetch(`${API_URL}/votos/frentes`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/votos/frentes`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await response.json();
             if (data.success) {
                 setFrentes(data.data);
@@ -86,7 +95,10 @@ const HistorialActas = () => {
     const iniciarEdicion = async (id) => {
         try {
             // Cargar detalle del acta
-            const response = await fetch(`${API_URL}/votos/acta/${id}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/votos/acta/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await response.json();
             
             if (data.success) {
@@ -426,13 +438,27 @@ const HistorialActas = () => {
                                                     <Eye className="w-4 h-4" />
                                                     Ver
                                                 </button>
-                                                <button
-                                                    onClick={() => iniciarEdicion(acta.id_acta)}
-                                                    className="flex items-center gap-2 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg transition text-sm font-semibold"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                    Editar
-                                                </button>
+                                                
+                                                {/* Solo mostrar botón editar para Administrador y Supervisor */}
+                                                {(() => {
+                                                    const user = JSON.parse(localStorage.getItem('usuario')) || {};
+                                                    const puedeEditar = user.rol === 'Administrador del Sistema' || 
+                                                                       user.rol === 'Administrador' || 
+                                                                       user.rol === 'Supervisor';
+                                                    
+                                                    if (puedeEditar) {
+                                                        return (
+                                                            <button
+                                                                onClick={() => iniciarEdicion(acta.id_acta)}
+                                                                className="flex items-center gap-2 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg transition text-sm font-semibold"
+                                                            >
+                                                                <Edit className="w-4 h-4" />
+                                                                Editar
+                                                            </button>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
                                             </div>
                                         </td>
                                     </tr>
