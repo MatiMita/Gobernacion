@@ -97,10 +97,7 @@ const ResultadosEnVivo = () => {
             setLoading(true);
             setError(null);
             
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/votos/resultados-vivo`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await fetch(`${API_URL}/votos/resultados-vivo`);
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
@@ -413,76 +410,79 @@ const ResultadosEnVivo = () => {
                             {/* ── GRÁFICO DE COLUMNAS VERTICALES — todos los partidos ── */}
                             <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-6 md:p-8"
                                 key={`cols-${animKey}`}>
-                                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <h3 className="text-center text-gray-400 text-xs font-bold uppercase tracking-widest mb-8 flex items-center justify-center gap-3">
                                     <span className="h-px flex-1 bg-blue-100" />
-                                    Comparativa de Partidos
+                                    <span className="flex items-center gap-1.5">
+                                        <BarChart3 className="w-4 h-4 text-[#1E3A8A]" /> Comparativa de Partidos
+                                    </span>
                                     <span className="h-px flex-1 bg-blue-100" />
                                 </h3>
-                                {/* Área del gráfico */}
-                                <div className="relative">
-                                    {/* Líneas de referencia horizontales */}
-                                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none" style={{ bottom: '56px', top: 0 }}>
-                                        {[100, 75, 50, 25].map(v => (
-                                            <div key={v} className="flex items-center gap-2">
-                                                <span className="text-[10px] text-gray-300 w-6 text-right flex-shrink-0">{v}%</span>
-                                                <div className="flex-1 border-t border-dashed border-slate-200" />
-                                            </div>
-                                        ))}
-                                    </div>
 
-                                    {/* Columnas */}
-                                    <div className="flex items-end gap-1 pl-8 pb-14" style={{ height: '220px' }}>
-                                        {activos.map((frente, index) => {
-                                            const votos   = frente.votos || 0;
-                                            const pct     = parseFloat(calcularPorcentaje(votos, totalActivo));
-                                            const barH    = maxVotos > 0 ? (votos / maxVotos) * 100 : 0;
-                                            const color   = frente.color || cfg.accent;
-                                            const isFirst = index === 0;
-                                            const med     = getMedalla(index);
-                                            /* Ancho proporcional: entre 28px y 80px según cantidad */
-                                            const colW    = Math.max(28, Math.min(80, Math.floor(780 / Math.max(activos.length, 1))));
-
-                                            return (
-                                                <div key={frente.id_frente}
-                                                    className="relative flex flex-col items-center justify-end h-full"
-                                                    style={{ width: `${colW}px`, flexShrink: 0, animation: `slideInUp .35s ease ${index * .06}s both` }}
-                                                >
-                                                    {/* Valor encima */}
-                                                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
-                                                        style={{ animation: `slideInUp .4s ease ${index * .07 + .2}s both`, opacity: 0 }}>
-                                                        <span className="text-[10px] font-black" style={{ color }}>{pct}%</span>
-                                                    </div>
-
-                                                    {/* Columna */}
-                                                    <div className="relative w-full rounded-t-xl overflow-hidden"
-                                                        style={{
-                                                            height: `${barH}%`,
-                                                            minHeight: votos > 0 ? '6px' : '0',
-                                                            background: `linear-gradient(to top, ${color}, ${color}99)`,
-                                                            animation: `riseUp ${0.8 + index * 0.07}s cubic-bezier(.22,1,.36,1) ${index * 0.06}s both`,
-                                                            boxShadow: isFirst ? `0 -4px 20px ${color}55` : 'none',
-                                                        }}
-                                                    >
-                                                        {isFirst && <div className="absolute inset-0 rounded-t-xl glow-winner opacity-60" />}
-                                                    </div>
-
-                                                    {/* Etiqueta inferior */}
-                                                    <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 w-full">
-                                                        {/* Medalla */}
-                                                        {index < 3 && (
-                                                            <div className="w-4 h-4 rounded-full flex items-center justify-center text-white font-black flex-shrink-0 pop-in"
-                                                                style={{ fontSize: '8px', backgroundColor: med.color, animationDelay: `${index * .08}s` }}>
-                                                                {med.label}
-                                                            </div>
-                                                        )}
-                                                        <span className="text-[10px] font-bold text-[#1E3A8A] truncate text-center leading-tight"
-                                                            style={{ maxWidth: `${colW + 4}px` }}>
-                                                            {frente.siglas}
-                                                        </span>
-                                                    </div>
+                                {/* Área del gráfico con líneas de referencia */}
+                                <div className="relative mx-auto" style={{ maxWidth: '100%' }}>
+                                    {/* Líneas de referencia y etiquetas de eje Y */}
+                                    <div className="relative" style={{ paddingLeft: '32px', paddingBottom: '64px' }}>
+                                        {/* Grid lines absolutas */}
+                                        <div className="absolute left-8 right-0 top-0" style={{ height: '200px' }}>
+                                            {[0, 25, 50, 75, 100].map(v => (
+                                                <div key={v} className="absolute w-full flex items-center"
+                                                    style={{ bottom: `${v * 2}px` }}>
+                                                    <span className="absolute -left-8 text-[9px] text-gray-300 font-semibold w-7 text-right">{v}%</span>
+                                                    <div className="w-full border-t border-dashed border-slate-100" />
                                                 </div>
-                                            );
-                                        })}
+                                            ))}
+                                        </div>
+
+                                        {/* Columnas centradas con justify-center */}
+                                        <div className="flex items-end justify-center gap-3 md:gap-4" style={{ height: '200px' }}>
+                                            {activos.map((frente, index) => {
+                                                const votos   = frente.votos || 0;
+                                                const pct     = parseFloat(calcularPorcentaje(votos, totalActivo));
+                                                const barH    = maxVotos > 0 ? (votos / maxVotos) * 200 : 0; /* px directos */
+                                                const color   = frente.color || cfg.accent;
+                                                const isFirst = index === 0;
+                                                const med     = getMedalla(index);
+                                                /* Ancho adaptable: pocos → anchas, muchos → delgadas */
+                                                const colW = Math.max(24, Math.min(72, Math.floor(700 / Math.max(activos.length, 1))));
+
+                                                return (
+                                                    <div key={frente.id_frente}
+                                                        className="relative flex flex-col items-center justify-end h-full"
+                                                        style={{ width: `${colW}px`, flexShrink: 0, animation: `slideInUp .35s ease ${index * .06}s both` }}
+                                                    >
+                                                        {/* Porcentaje encima */}
+                                                        <div className="absolute whitespace-nowrap text-center"
+                                                            style={{ bottom: `${barH + 6}px`, animation: `slideInUp .4s ease ${index * .07 + .15}s both`, opacity: 0 }}>
+                                                            <span className="text-[10px] font-black" style={{ color }}>{pct}%</span>
+                                                        </div>
+
+                                                        {/* Columna animada */}
+                                                        <div className="relative w-full rounded-t-xl overflow-hidden flex-shrink-0"
+                                                            style={{
+                                                                height: `${barH}px`,
+                                                                minHeight: votos > 0 ? '4px' : '0',
+                                                                background: `linear-gradient(to top, ${color}, ${color}aa)`,
+                                                                animation: `riseUp ${0.75 + index * 0.07}s cubic-bezier(.22,1,.36,1) ${index * 0.06}s both`,
+                                                                boxShadow: isFirst ? `0 -4px 18px ${color}55` : 'none',
+                                                            }}
+                                                        >
+                                                            {isFirst && <div className="absolute inset-0 rounded-t-xl glow-winner opacity-50" />}
+                                                        </div>
+
+                                                        {/* Etiqueta inferior */}
+                                                        <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5" style={{ width: `${colW + 8}px` }}>
+                                                            {index < 3 && (
+                                                                <div className="w-4 h-4 rounded-full flex items-center justify-center text-white font-black pop-in"
+                                                                    style={{ fontSize: '7px', backgroundColor: med.color, animationDelay: `${index * .08}s`, flexShrink: 0 }}>
+                                                                    {med.label}
+                                                                </div>
+                                                            )}
+                                                            <span className="text-[10px] font-bold text-[#1E3A8A] text-center leading-tight w-full truncate">{frente.siglas}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
