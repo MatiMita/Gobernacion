@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:prod": "vite build --mode production",
+    "start:prod": "cd backend && node server.js"
   },
   "dependencies": {
     "browser-image-compression": "^2.0.2",
