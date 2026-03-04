@@ -95,7 +95,7 @@ const ResultadosEnVivo = () => {
     const [animKey, setAnimKey] = useState(0);   // fuerza re-animación al cambiar cargo
     const [donutReady, setDonutReady] = useState(false);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const API_URL = import.meta.env.VITE_API_URL;
 
     const cargarResultados = async () => {
         try {
